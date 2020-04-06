@@ -2,20 +2,9 @@
 
 
 //Default values
-const float Boid::default_size = 5.f;
+const float Boid::default_size = 8.f;
 const sf::Color Boid::default_color = sf::Color::Green;
 
-/*
-Boid::Boid()
-{
-	this->shape = sf::CircleShape(default_size, 3);
-	shape.setFillColor(default_color);
-	shape.setOrigin(shape.getRadius(), shape.getRadius());
-
-	this->velocity = sf::Vector2f(-1., 0.5);
-
-
-} */
 
 Boid::Boid(float size, sf::Color color, sf::Vector2f position, sf::Vector2f velocity)
 {
@@ -32,7 +21,7 @@ Boid::Boid(float size, sf::Color color, sf::Vector2f position, sf::Vector2f velo
 
 void Boid::update(const sf::RenderWindow& window)
 {
-	shape.move(velocity);
+	shape.move(velocity * speed);
 
 	warpBoidIfOutOfBounds(window);
 

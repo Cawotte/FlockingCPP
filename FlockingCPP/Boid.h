@@ -3,6 +3,7 @@
 
 #include "SFML/Window.hpp"
 #include "SFML/Graphics.hpp"
+#include "Vector2Utilities.hpp"
 
 class Boid
 {
@@ -14,6 +15,7 @@ private:
 	static const sf::Color default_color;
 
 	//Members
+	float speed = 5.;
 
 	//-- References
 
@@ -23,12 +25,10 @@ private:
 	sf::Vector2f velocity;
 
 	//Methods
-
 	void warpBoidIfOutOfBounds(const sf::RenderWindow& window);
 public:
 
 	//Constructor
-	//Boid();
 
 	Boid(float size = default_size, sf::Color color = default_color, 
 		sf::Vector2f position = sf::Vector2f(), sf::Vector2f velocity = sf::Vector2f());
@@ -38,8 +38,14 @@ public:
 		return shape;
 	}
 
+	void setPosition(sf::Vector2f position) {
+		shape.setPosition(position);
+	}
+
 	void setVelocity(sf::Vector2f velocity) {
 		this->velocity = velocity;
+
+		shape.setRotation(Utils::Vector2::getAngleDegree(velocity));
 	}
 
 	//Methods

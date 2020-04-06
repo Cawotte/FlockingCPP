@@ -152,10 +152,11 @@
   <ItemGroup>
     <ClCompile Include="Boid.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Vector2Utilities.cpp" />
+    <ClCompile Include="SFMLApp.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Boid.h" />
+    <ClInclude Include="SFMLApp.h" />
     <ClInclude Include="Vector2Utilities.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

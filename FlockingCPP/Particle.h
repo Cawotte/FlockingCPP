@@ -5,33 +5,31 @@
 #include "SFML/Graphics.hpp"
 #include "Vector2Utilities.hpp"
 
-class Boid
+class Particle
 {
 
 private:
 
-	//Default values
-	static const float default_size;
-	static const sf::Color default_color;
-
 	//Members
-	float speed = 5.;
+	float maxSpeed = 150.;
 
-	//-- References
-
-	//-- Attributes
 	sf::CircleShape shape;
 
-	sf::Vector2f velocity;
+	sf::Vector2f velocity; //Init at zero already
+	sf::Vector2f acceleration;
 
 	//Methods
-	void warpBoidIfOutOfBounds(const sf::RenderWindow& window);
+
+	void resetAcceleration();
+
+protected:
+
+
 public:
 
 	//Constructor
 
-	Boid(float size = default_size, sf::Color color = default_color, 
-		sf::Vector2f position = sf::Vector2f(), sf::Vector2f velocity = sf::Vector2f());
+	Particle(float size = 8.f, sf::Color color = sf::Color::Green);
 
 	//Getter / Setters
 	sf::CircleShape& getShape() {
@@ -49,7 +47,13 @@ public:
 	}
 
 	//Methods
-	void update(const sf::RenderWindow& window);
+	void applyForce(sf::Vector2f force);
+
+
+	virtual void update(const float deltaTime);
+
+	virtual void updatePosition(const float deltaTime);
+
 
 
 };

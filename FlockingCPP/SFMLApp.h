@@ -3,7 +3,7 @@
 
 #include "SFML/Graphics.hpp"
 
-#include "Boid.h"
+#include "Particle.h"
 
 class SFMLApp
 {
@@ -19,10 +19,13 @@ private:
 	const int widthWindow = 600;
 
 	//Members
-	std::vector<Boid> boids;
+	sf::RenderWindow* window_ptr;
+	std::vector<Particle> boids;
 
 	///Methods
 	sf::Vector2f getDirectionFromKeyboardInputs();
+
+	void warpParticleIfOutOfBounds(Particle& particle);
 
 public:
 

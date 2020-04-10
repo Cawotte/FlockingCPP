@@ -1,14 +1,14 @@
 #include "FlockingRule.h"
 
-#include "Vector2Utilities.hpp"
+#include "Utils.hpp"
 #include "Boid.h"
 
 
-using namespace Utils;
+using namespace utils;
 
 sf::Drawable* FlockingRule::getVectorShape(Boid* boid)
 {
-	return Utils::getVectorShape(boid->getPosition(), force * weight, debugColor);
+	return graphics::getVectorShape(boid->getPosition(), getWeightedForce(), debugColor);
 }
 
 sf::Vector2f FlockingRule::computeWeightedForce(const std::vector<Boid*>& neighbordhood, Boid* boid)
@@ -50,8 +50,8 @@ sf::Vector2f SeparationRule::computeForce(const std::vector<Boid*>& neighbordhoo
 	for (std::vector<Boid*>::const_iterator it = neighbordhood.begin(); it != neighbordhood.end(); it++)
 	{
 		Boid* flockmate = (*it);
-		float distance = Vector2::getDistance(boid->getPosition(), flockmate->getPosition());
-		sf::Vector2f direction = Vector2::normalized(flockmate->getPosition() - boid->getPosition());
+		float distance = vector2::getDistance(boid->getPosition(), flockmate->getPosition());
+		sf::Vector2f direction = vector2::normalized(flockmate->getPosition() - boid->getPosition());
 
 		//Each neighbor has an influence proportional to its distance
 		if (distance > 0) {

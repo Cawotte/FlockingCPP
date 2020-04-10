@@ -2,10 +2,10 @@
 
 #include <iostream>
 #include "SFML/Window.hpp"
-#include "Vector2Utilities.hpp"
+#include "Utils.hpp"
 #include "Boid.h"
 
-using namespace Utils;
+using namespace utils;
 
 sf::Vector2f SFMLApp::getDirectionFromKeyboardInputs()
 {
@@ -15,25 +15,25 @@ sf::Vector2f SFMLApp::getDirectionFromKeyboardInputs()
 	//Real-time input
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
 	{
-		direction += Vector2::left();
+		direction += vector2::left();
 	}
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
 	{
-		direction += Vector2::right();
+		direction += vector2::right();
 	}
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
 	{
-		direction += Vector2::up();
+		direction += vector2::up();
 	}
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
 	{
-		direction += Vector2::down();
+		direction += vector2::down();
 	}
 
-	direction = Vector2::normalized(direction);
+	direction = vector2::normalized(direction);
 
 	return direction;
 }
@@ -83,8 +83,8 @@ int SFMLApp::run()
 
 		//New boids with random starting positions
 		Boid* boid = new Boid(&particles);
-		boid->setPosition(Vector2::getRandom(heightWindow, widthWindow));
-		boid->setVelocity(Vector2::getVector2FromDegree(rand() % 180) * baseSpeed); //Random dir
+		boid->setPosition(vector2::getRandom(heightWindow, widthWindow));
+		boid->setVelocity(vector2::getVector2FromDegree(rand() % 180) * baseSpeed); //Random dir
 
 		if (i == 0) {
 			boid->drawDebug = true;

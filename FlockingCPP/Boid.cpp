@@ -4,7 +4,7 @@
 
 #include <iostream>
 
-using namespace Utils;
+using namespace utils;
 
 std::vector<Boid*> Boid::computeBoidNeighbordhood()
 {
@@ -19,7 +19,7 @@ std::vector<Boid*> Boid::computeBoidNeighbordhood()
 
 		if (boid != nullptr && boid != this) {
 
-			float distance = Vector2::getDistance(getPosition(), boid->getPosition());
+			float distance = vector2::getDistance(getPosition(), boid->getPosition());
 			//Verify if boid is close enough to be part of the neighborhood
 			if (distance <= detectionRadius)
 			{
@@ -37,7 +37,7 @@ Boid::Boid(std::vector<Particle*>* particles_) : Particle(), particles(particles
 {
 	rules.push_back(new SeparationRule(600));
 	rules.push_back(new CohesionRule(0.2));
-	rules.push_back(new AlignmentRule(0.02));
+	rules.push_back(new AlignmentRule(0.05));
 }
 
 std::vector<sf::Drawable*> Boid::toDraw()
@@ -64,7 +64,7 @@ std::vector<sf::Drawable*> Boid::toDraw()
 		}
 
 		//Display velocity
-		//sf::Drawable* lineVelocity = Utils::getVectorShape(getPosition(), getVelocity(), getShape()->getFillColor());
+		//sf::Drawable* lineVelocity = utils::graphics::getVectorShape(getPosition(), getVelocity(), getShape()->getFillColor());
 		//shapesToDraw.push_back(lineVelocity);
 
 	}
@@ -80,7 +80,7 @@ void Boid::update(const float deltaTime)
 	for (auto& rule : rules) 
 	{
 		sf::Vector2f weightedForce = rule->computeWeightedForce(neighbordhood, this);
-		std::cout << typeid(*rule).name() << " Force : " << Vector2::getMagnitude(weightedForce) << std::endl;
+		std::cout << typeid(*rule).name() << " Force : " << vector2::getMagnitude(weightedForce) << std::endl;
 		applyForce(weightedForce);
 	}
 

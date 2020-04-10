@@ -45,9 +45,9 @@ void Particle::updatePosition(const float deltaTime)
 	resetAcceleration();
 
 	//If velocity too high, cap it
-	if (Utils::Vector2::getMagnitude(velocity) > maxSpeed) 
+	if (utils::vector2::getMagnitude(velocity) > maxSpeed) 
 	{
-		setVelocity(Utils::Vector2::normalized(velocity) * maxSpeed);
+		setVelocity(utils::vector2::normalized(velocity) * maxSpeed);
 	}
 
 	shape.move(velocity * deltaTime);
@@ -59,5 +59,5 @@ void Particle::updatePosition(const float deltaTime)
 
 void Particle::resetAcceleration()
 {
-	acceleration = Utils::Vector2::zero();
+	acceleration = utils::vector2::zero();
 }

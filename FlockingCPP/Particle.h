@@ -3,7 +3,7 @@
 
 #include "SFML/Window.hpp"
 #include "SFML/Graphics.hpp"
-#include "Vector2Utilities.hpp"
+#include "Utils.hpp"
 
 class Particle
 {
@@ -11,7 +11,7 @@ class Particle
 private:
 
 	//Members
-	float maxSpeed = 200.;
+	float maxSpeed = 120.;
 
 	sf::CircleShape shape;
 
@@ -19,8 +19,6 @@ private:
 	sf::Vector2f acceleration;
 
 	//Methods
-
-
 	void resetAcceleration();
 
 protected:
@@ -52,7 +50,7 @@ public:
 	void setVelocity(sf::Vector2f velocity_) {
 		velocity = velocity_;
 
-		shape.setRotation(Utils::Vector2::getAngleDegree(velocity));
+		shape.setRotation(utils::vector2::getAngleDegree(velocity));
 	}
 
 	//Methods

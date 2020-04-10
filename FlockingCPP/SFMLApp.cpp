@@ -2,7 +2,9 @@
 
 #include <iostream>
 #include "SFML/Window.hpp"
+#include "SFML/Graphics.hpp"
 #include "Vector2Utilities.hpp"
+#include "Boid.h"
 
 using namespace Utils;
 
@@ -40,7 +42,7 @@ sf::Vector2f SFMLApp::getDirectionFromKeyboardInputs()
 void SFMLApp::warpParticleIfOutOfBounds(Particle& particle)
 {
 	//Correct position with windows borders
-	sf::Vector2f position = particle.getShape().getPosition();
+	sf::Vector2f position = particle.getShape()->getPosition();
 	sf::Vector2u sizeWindow = window_ptr->getSize();
 
 	if (position.x < 0) {
@@ -58,9 +60,9 @@ void SFMLApp::warpParticleIfOutOfBounds(Particle& particle)
 	}
 
 	//If the position changed
-	if (position != particle.getShape().getPosition())
+	if (position != particle.getShape()->getPosition())
 	{
-		particle.getShape().setPosition(position);
+		particle.getShape()->setPosition(position);
 	}
 }
 
@@ -75,20 +77,33 @@ int SFMLApp::run()
 
 	window_ptr = &window;
 	
-	int nbBoids = 10;
-	float baseSpeed = 50.;
-	for (int i = 0; i < nbBoids; i++) {
-
-		//New boids with random starting positions
-		Particle boid;
+	/*
+	particles = std::vector<Particle*>(nbBoids);
+	for (auto& particle : particles) 
+	{
+		Boid boid = Boid(&particles);
 		boid.setPosition(Vector2::getRandom(heightWindow, widthWindow));
 		boid.setVelocity(Vector2::getVector2FromDegree(rand() % 180) * baseSpeed); //Random dir
 
-		boids.push_back(boid);
+		*particle = boid;
+	}*/
+
+
+	particles = std::vector<Particle*>();
+	particles.reserve(nbBoids);
+	for (int i = 0; i < nbBoids; i++) {
+
+		//New boids with random starting positions
+		Boid* boid = new Boid(&particles);
+		boid->setPosition(Vector2::getRandom(heightWindow, widthWindow));
+		boid->setVelocity(Vector2::getVector2FromDegree(rand() % 180) * baseSpeed); //Random dir
+
+		particles.push_back(boid);
 	}
 
 	sf::Clock deltaClock;
 
+	std::cout << "Hellooo : " << particles.size() << std::endl;
 	/// MAIN LOOP
 	while (window.isOpen())
 	{
@@ -108,33 +123,38 @@ int SFMLApp::run()
 
 		if (axisInput != sf::Vector2f()) 
 		{
-			boids[0].applyForce(axisInput * 5.f);
+			particles[0]->applyForce(axisInput * 5.f);
 		}
 
 		///UPDATE LOGIC
 
 		//update each boid logic
-		for (std::vector<Particle>::iterator it = boids.begin(); it != boids.end(); it++) {
-			it->update(deltaTime.asSeconds());
+		for (auto& p : particles) {
+			p->update(deltaTime.asSeconds());
 		}
 
 		/* Update logic and position are separated so the movement calculations don't 
-		take into account the new positions of other boids */
+		take into account the new positions of other boid */
 
 		//Update their position
-		for (std::vector<Particle>::iterator it = boids.begin(); it != boids.end(); it++) {
-			it->updatePosition(deltaTime.asSeconds());
-			warpParticleIfOutOfBounds(*it);
+		for (auto& p : particles) {
+			p->updatePosition(deltaTime.asSeconds());
+			warpParticleIfOutOfBounds(*p);
 		}
-		
 
 		///DRAW SCENE
 
 		window.clear();
 
 		//Draw each boid
-		for (std::vector<Particle>::iterator it = boids.begin(); it != boids.end(); it++) {
-			window.draw(it->getShape());
+		for (auto& p : particles) {
+			
+			//The particle returns all their components to draw
+			std::vector<sf::Drawable*> toDraw = p->toDraw();
+			for (std::vector<sf::Drawable*>::iterator itd = toDraw.begin(); itd != toDraw.end(); itd++)
+			{
+				window.draw(**itd);
+			} 
 		}
 
 		window.display();

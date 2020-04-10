@@ -150,13 +150,19 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Boid.cpp" />
+    <ClCompile Include="FlockingRule.cpp" />
     <ClCompile Include="Particle.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="SFMLApp.cpp" />
+    <ClCompile Include="Utils.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Boid.h" />
+    <ClInclude Include="FlockingRule.h" />
     <ClInclude Include="Particle.h" />
     <ClInclude Include="SFMLApp.h" />
+    <ClInclude Include="Utils.hpp" />
     <ClInclude Include="Vector2Utilities.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

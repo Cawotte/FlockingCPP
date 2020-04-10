@@ -4,6 +4,7 @@
 #include "SFML/Graphics.hpp"
 
 #include "Particle.h"
+#include "Utils.hpp"
 
 class SFMLApp
 {
@@ -18,9 +19,13 @@ private:
 	const int heightWindow = 800;
 	const int widthWindow = 600;
 
+	int nbBoids = 5;
+	float baseSpeed = 100.;
+
 	//Members
 	sf::RenderWindow* window_ptr;
-	std::vector<Particle> boids;
+	std::vector<Particle*> particles;
+
 
 	///Methods
 	sf::Vector2f getDirectionFromKeyboardInputs();

@@ -8,10 +8,22 @@ Particle::Particle(float size, sf::Color color)
 	shape.setOrigin(shape.getRadius(), shape.getRadius());
 	shape.setPosition(sf::Vector2f());
 
+	velocity = sf::Vector2f();
+	acceleration = sf::Vector2f();
+
 }
 
 
 //Public Methods
+
+std::vector<sf::Drawable*> Particle::toDraw()
+{
+	std::vector<sf::Drawable*> drawables;
+
+	drawables.push_back(getShape());
+
+	return drawables;
+}
 
 void Particle::applyForce(sf::Vector2f force)
 {

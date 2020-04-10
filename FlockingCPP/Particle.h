@@ -11,14 +11,15 @@ class Particle
 private:
 
 	//Members
-	float maxSpeed = 150.;
+	float maxSpeed = 200.;
 
 	sf::CircleShape shape;
 
-	sf::Vector2f velocity; //Init at zero already
+	sf::Vector2f velocity;
 	sf::Vector2f acceleration;
 
 	//Methods
+
 
 	void resetAcceleration();
 
@@ -32,23 +33,32 @@ public:
 	Particle(float size = 8.f, sf::Color color = sf::Color::Green);
 
 	//Getter / Setters
-	sf::CircleShape& getShape() {
-		return shape;
+	sf::CircleShape* getShape() {
+		return &shape;
+	}
+
+	sf::Vector2f getPosition() {
+		return shape.getPosition();
+	}
+
+	sf::Vector2f getVelocity() {
+		return velocity;
 	}
 
 	void setPosition(sf::Vector2f position) {
 		shape.setPosition(position);
 	}
 
-	void setVelocity(sf::Vector2f velocity) {
-		this->velocity = velocity;
+	void setVelocity(sf::Vector2f velocity_) {
+		velocity = velocity_;
 
 		shape.setRotation(Utils::Vector2::getAngleDegree(velocity));
 	}
 
 	//Methods
-	void applyForce(sf::Vector2f force);
+	virtual std::vector<sf::Drawable*> toDraw();
 
+	void applyForce(sf::Vector2f force);
 
 	virtual void update(const float deltaTime);
 

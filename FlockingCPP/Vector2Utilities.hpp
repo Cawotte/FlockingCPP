@@ -46,6 +46,9 @@ namespace Utils {
 		float getMagnitude(const Vec2& vector);
 
 		template <class Vec2 = sf::Vector2f>
+		float getDistance(const Vec2& a, const Vec2& b);
+
+		template <class Vec2 = sf::Vector2f>
 		Vec2 normalized(const Vec2& vector);
 
 		// IMPLEMENTATION
@@ -91,7 +94,7 @@ namespace Utils {
 		template <class Vec2>
 		float getAngleDegree(const Vec2& vector)
 		{
-			return getAngleRadian(vector) * 180 / M_PI;
+			return getAngleRadian(vector) * 180 / (float)M_PI;
 		}
 
 		template <class Vec2>
@@ -103,7 +106,7 @@ namespace Utils {
 		template <class Vec2>
 		Vec2 getVector2FromDegree(const float degree)
 		{
-			float radian = degree * (M_PI / 180.);
+			float radian = degree * ((float)M_PI / 180.);
 			return getVector2FromRadian(radian);
 		}
 
@@ -119,6 +122,13 @@ namespace Utils {
 			return sqrt((vector.x * vector.x) + (vector.y * vector.y));
 		}
 
+		template <class Vec2>
+		float getDistance(const Vec2& a, const Vec2& b)
+		{
+			Vec2 ab = a - b;
+			return sqrt(ab.x * ab.x + 
+						ab.y * ab.y);
+		}
 
 		template <class Vec2>
 		Vec2 normalized(const Vec2& vector)

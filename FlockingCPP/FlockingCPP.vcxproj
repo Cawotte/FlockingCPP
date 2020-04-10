@@ -156,6 +156,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="SFMLApp.cpp" />
     <ClCompile Include="Utils.cpp" />
+    <ClCompile Include="Vector2Utilities.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Boid.h" />

@@ -2,7 +2,6 @@
 
 #include <iostream>
 #include "SFML/Window.hpp"
-#include "SFML/Graphics.hpp"
 #include "Vector2Utilities.hpp"
 #include "Boid.h"
 
@@ -76,17 +75,6 @@ int SFMLApp::run()
 	window.setFramerateLimit(maxFramerate);
 
 	window_ptr = &window;
-	
-	/*
-	particles = std::vector<Particle*>(nbBoids);
-	for (auto& particle : particles) 
-	{
-		Boid boid = Boid(&particles);
-		boid.setPosition(Vector2::getRandom(heightWindow, widthWindow));
-		boid.setVelocity(Vector2::getVector2FromDegree(rand() % 180) * baseSpeed); //Random dir
-
-		*particle = boid;
-	}*/
 
 
 	particles = std::vector<Particle*>();
@@ -98,8 +86,12 @@ int SFMLApp::run()
 		boid->setPosition(Vector2::getRandom(heightWindow, widthWindow));
 		boid->setVelocity(Vector2::getVector2FromDegree(rand() % 180) * baseSpeed); //Random dir
 
+		if (i == 0) {
+			boid->drawDebug = true;
+		}
 		particles.push_back(boid);
 	}
+
 
 	sf::Clock deltaClock;
 

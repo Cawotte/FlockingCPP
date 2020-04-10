@@ -3,7 +3,11 @@
 #define _USE_MATH_DEFINES //Pour utiliser PI
 #include <math.h> 
 
+#include "SFML/Graphics.hpp"
+
 namespace Utils {
+
+	sf::Drawable* getVectorShape(const sf::Vector2f start, const sf::Vector2f vector, const sf::Color color);
 
 	namespace Vector2 {
 
@@ -147,6 +151,8 @@ namespace Utils {
 		}
 
 	}
+
+
 
 
 

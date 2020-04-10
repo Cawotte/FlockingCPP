@@ -3,8 +3,7 @@
 
 #include "SFML/Graphics.hpp"
 
-#include "Particle.h"
-#include "Utils.hpp"
+class Particle;
 
 class SFMLApp
 {
@@ -19,7 +18,7 @@ private:
 	const int heightWindow = 800;
 	const int widthWindow = 600;
 
-	int nbBoids = 5;
+	int nbBoids = 15;
 	float baseSpeed = 100.;
 
 	//Members

@@ -1,6 +1,7 @@
 #pragma once
 #include "Particle.h"
-#include "Utils.hpp"
+
+class FlockingRule;
 
 class Boid : public Particle
 {
@@ -11,36 +12,24 @@ private:
 
 	std::vector<Particle*>* particles;
 
-	float detectionRadius = 250.;
+	float detectionRadius = 100.;
 
-	//Weights
-	float cohesionWeight = 1.f;
-	float separationWeight = 1000.f;
-	float alignmentWeight = 0.2f;
+	std::vector<FlockingRule*> rules;
 
 	//Methods
 	std::vector<Boid*> computeBoidNeighbordhood();
 
-	//Rules
-
-	/* Steer to avoid local flockmates */
-	sf::Vector2f separationForce(const std::vector<Boid*> &neighbordhood);
-
-	/* Steer toward average heading of local flockmates */
-	sf::Vector2f alignmentForce(const std::vector<Boid*> &neighbordhood);
-
-	/* Steer to move toward center of mass of local flockmates */
-	sf::Vector2f cohesionForce(const std::vector<Boid*> &neighbordhood);
 
 public:
 
-	Boid() : Particle() {}
+	bool drawDebug = false;
 
+	Boid(std::vector<Particle*>* particles_);
 
-	Boid(std::vector<Particle*>* particles_) : Particle(), particles(particles_) {}
-
+	std::vector<sf::Drawable*> toDraw() override;
 
 	void update(const float deltaTime) override;
+
 
 };
 

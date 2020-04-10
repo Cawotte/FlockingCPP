@@ -1,7 +1,6 @@
 #include "Boid.h"
-#include "Vector2Utilities.hpp"
-#include "SFML/Window.hpp"
-#include "SFML/Graphics.hpp"
+
+#include "FlockingRule.h"
 
 #include <iostream>
 
@@ -21,7 +20,6 @@ std::vector<Boid*> Boid::computeBoidNeighbordhood()
 		if (boid != nullptr && boid != this) {
 
 			float distance = Vector2::getDistance(getPosition(), boid->getPosition());
-			std::cout << "distance : " << distance << std::endl;
 			//Verify if boid is close enough to be part of the neighborhood
 			if (distance <= detectionRadius)
 			{
@@ -34,72 +32,43 @@ std::vector<Boid*> Boid::computeBoidNeighbordhood()
 	return neighborhood;
 }
 
-sf::Vector2f Boid::separationForce(const std::vector<Boid*>& neighbordhood)
+
+Boid::Boid(std::vector<Particle*>* particles_) : Particle(), particles(particles_)
 {
+	rules.push_back(new SeparationRule(600));
+	rules.push_back(new CohesionRule(0.2));
+	rules.push_back(new AlignmentRule(0.02));
+}
 
-	//Try to avoid boids too close
-	sf::Vector2f separatingForce;
+std::vector<sf::Drawable*> Boid::toDraw()
+{
+	std::vector<sf::Drawable*> shapesToDraw = Particle::toDraw();
 
-	for (std::vector<Boid*>::const_iterator it = neighbordhood.begin(); it != neighbordhood.end(); it++)
-	{
-		Boid* flockmate = (*it);
-		float distance = Vector2::getDistance(getPosition(), flockmate->getPosition());
-		sf::Vector2f direction = Vector2::normalized(flockmate->getPosition() - getPosition());
+	if (drawDebug) {
 
-		//Each neighbor has an influence proportional to its distance
-		if (distance > 0) {
-			separatingForce += -direction / distance;
+		//Display radius detection
+		sf::CircleShape* vision = new sf::CircleShape(detectionRadius);
+
+		vision->setFillColor(sf::Color::Transparent);
+		vision->setOutlineThickness(1.);
+		vision->setOrigin(vision->getRadius(), vision->getRadius());
+		vision->setOutlineColor(sf::Color::Blue);
+		vision->setPosition(getPosition());
+
+		shapesToDraw.push_back(vision);
+
+		//Display rules
+		for (auto& rule : rules)
+		{
+			shapesToDraw.push_back(rule->getVectorShape(this));
 		}
+
+		//Display velocity
+		//sf::Drawable* lineVelocity = Utils::getVectorShape(getPosition(), getVelocity(), getShape()->getFillColor());
+		//shapesToDraw.push_back(lineVelocity);
+
 	}
-
-	if (neighbordhood.size() > 0)
-	{
-		separatingForce /= static_cast<float>(neighbordhood.size());
-	}
-
-	return separatingForce;
-}
-
-sf::Vector2f Boid::alignmentForce(const std::vector<Boid*> &neighbordhood)
-{
-	//Try to match the heading and speed of neighbors = Average velocity
-
-	sf::Vector2f averageVelocity;
-
-	for (std::vector<Boid*>::const_iterator it = neighbordhood.begin(); it != neighbordhood.end(); it++)
-	{
-		averageVelocity += (*it)->getVelocity();
-	}
-
-	if (neighbordhood.size() > 0)
-	{
-		averageVelocity /= static_cast<float>(neighbordhood.size());
-	}
-
-	return averageVelocity;
-}
-
-sf::Vector2f Boid::cohesionForce(const std::vector<Boid*> &neighbordhood)
-{
-
-	sf::Vector2f centerOfMass;
-
-	for (std::vector<Boid*>::const_iterator it = neighbordhood.begin(); it != neighbordhood.end(); it++)
-	{
-		centerOfMass += (*it)->getPosition();
-	}
-
-	if (neighbordhood.size() > 0)
-	{
-		centerOfMass /= static_cast<float>(neighbordhood.size());
-	}
-
-	//Get direction toward center of mass
-	sf::Vector2f towardCenter = centerOfMass - getPosition();
-
-	//normalize?
-
-	return towardCenter;
+	return shapesToDraw;
 }
 
 void Boid::update(const float deltaTime)
@@ -108,19 +77,11 @@ void Boid::update(const float deltaTime)
 
 	std::vector<Boid*> neighbordhood = computeBoidNeighbordhood();
 
-	sf::Vector2f force = cohesionWeight * cohesionForce(neighbordhood);
-
-	std::cout << "Force : " << Vector2::getMagnitude(force) << std::endl;
-	applyForce(force);
-
-	force = separationWeight * separationForce(neighbordhood);
-	std::cout << "Force : " << Vector2::getMagnitude(force) << std::endl;
-	applyForce(force);
-
-	force = alignmentWeight * alignmentForce(neighbordhood);
-	std::cout << "Force : " << Vector2::getMagnitude(force) << std::endl;
-	applyForce(force);
-
-	//std::cout << "NeighborCount : " << neighbordhood.size() << std::endl;
+	for (auto& rule : rules) 
+	{
+		sf::Vector2f weightedForce = rule->computeWeightedForce(neighbordhood, this);
+		std::cout << typeid(*rule).name() << " Force : " << Vector2::getMagnitude(weightedForce) << std::endl;
+		applyForce(weightedForce);
+	}
 
 }

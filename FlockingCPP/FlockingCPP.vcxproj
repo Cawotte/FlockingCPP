@@ -91,12 +91,12 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>D:\Users\Cawotte\Documents\_DOCUMENTS\Divers\C++\SFML-2.5.1-windows-vc15-32-bit\SFML-2.5.1\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\Users\Cawotte\Documents\_DOCUMENTS\Divers\C++\imgui-sfml-master;D:\Users\Cawotte\Documents\_DOCUMENTS\Divers\C++\imgui-master;D:\Users\Cawotte\Documents\_DOCUMENTS\Divers\C++\SFML-2.5.1-windows-vc15-32-bit\SFML-2.5.1\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>sfml-graphics-d.lib;sfml-window-d.lib;sfml-system-d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>sfml-graphics-d.lib;sfml-window-d.lib;sfml-system-d.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>D:\Users\Cawotte\Documents\_DOCUMENTS\Divers\C++\SFML-2.5.1-windows-vc15-32-bit\SFML-2.5.1\lib</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -121,7 +121,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>D:\Users\Cawotte\Documents\_DOCUMENTS\Divers\C++\SFML-2.5.1-windows-vc15-32-bit\SFML-2.5.1\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\Users\Cawotte\Documents\_DOCUMENTS\Divers\C++\imgui-sfml-master;D:\Users\Cawotte\Documents\_DOCUMENTS\Divers\C++\imgui-master;D:\Users\Cawotte\Documents\_DOCUMENTS\Divers\C++\SFML-2.5.1-windows-vc15-32-bit\SFML-2.5.1\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -152,6 +152,11 @@
   <ItemGroup>
     <ClCompile Include="Boid.cpp" />
     <ClCompile Include="FlockingRule.cpp" />
+    <ClCompile Include="Imgui-SFML\imgui-SFML.cpp" />
+    <ClCompile Include="Imgui-SFML\imgui.cpp" />
+    <ClCompile Include="Imgui-SFML\imgui_demo.cpp" />
+    <ClCompile Include="Imgui-SFML\imgui_draw.cpp" />
+    <ClCompile Include="Imgui-SFML\imgui_widgets.cpp" />
     <ClCompile Include="Particle.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="SFMLApp.cpp" />

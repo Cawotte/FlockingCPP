@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Source Files\Imgui-SFML">
+      <UniqueIdentifier>{dcf25052-75a8-4003-9e5a-ed4391c47551}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -32,6 +35,21 @@
     </ClCompile>
     <ClCompile Include="Utils.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Imgui-SFML\imgui_demo.cpp">
+      <Filter>Source Files\Imgui-SFML</Filter>
+    </ClCompile>
+    <ClCompile Include="Imgui-SFML\imgui_draw.cpp">
+      <Filter>Source Files\Imgui-SFML</Filter>
+    </ClCompile>
+    <ClCompile Include="Imgui-SFML\imgui_widgets.cpp">
+      <Filter>Source Files\Imgui-SFML</Filter>
+    </ClCompile>
+    <ClCompile Include="Imgui-SFML\imgui-SFML.cpp">
+      <Filter>Source Files\Imgui-SFML</Filter>
+    </ClCompile>
+    <ClCompile Include="Imgui-SFML\imgui.cpp">
+      <Filter>Source Files\Imgui-SFML</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

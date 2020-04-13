@@ -22,10 +22,26 @@ private:
 
 public:
 
-	bool drawDebug = false;
+	//Member
+	bool drawDebugRadius = true;
+	bool drawDebugRules = true;
 
+	//Constructor
 	Boid(std::vector<Particle*>* particles_);
 
+	//Getter - Setters
+	void setFlockingRules(std::vector<FlockingRule*> newRules)
+	{
+		rules = newRules;
+	}
+
+	void setDetectionRadius(float newRadius)
+	{
+		detectionRadius = newRadius;
+	}
+
+
+	//Methods
 	std::vector<sf::Drawable*> toDraw() override;
 
 	void update(const float deltaTime) override;

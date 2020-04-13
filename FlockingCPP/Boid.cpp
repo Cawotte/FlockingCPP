@@ -8,7 +8,7 @@ using namespace utils;
 
 std::vector<Boid*> Boid::computeBoidNeighbordhood()
 {
-	std::cout << "Size : " << particles->size() << std::endl;
+	//std::cout << "Size : " << particles->size() << std::endl;
 	std::vector<Boid*> neighborhood;
 
 	//std::cout << "Size : " << neighborhood.size() << std::endl;
@@ -35,16 +35,17 @@ std::vector<Boid*> Boid::computeBoidNeighbordhood()
 
 Boid::Boid(std::vector<Particle*>* particles_) : Particle(), particles(particles_)
 {
+	/*
 	rules.push_back(new SeparationRule(600));
 	rules.push_back(new CohesionRule(0.2));
-	rules.push_back(new AlignmentRule(0.05));
+	rules.push_back(new AlignmentRule(0.05)); */
 }
 
 std::vector<sf::Drawable*> Boid::toDraw()
 {
 	std::vector<sf::Drawable*> shapesToDraw = Particle::toDraw();
 
-	if (drawDebug) {
+	if (drawDebugRadius) {
 
 		//Display radius detection
 		sf::CircleShape* vision = new sf::CircleShape(detectionRadius);
@@ -57,17 +58,18 @@ std::vector<sf::Drawable*> Boid::toDraw()
 
 		shapesToDraw.push_back(vision);
 
+	}
+
+	if (drawDebugRules)
+	{
+
 		//Display rules
 		for (auto& rule : rules)
 		{
 			shapesToDraw.push_back(rule->getVectorShape(this));
 		}
-
-		//Display velocity
-		//sf::Drawable* lineVelocity = utils::graphics::getVectorShape(getPosition(), getVelocity(), getShape()->getFillColor());
-		//shapesToDraw.push_back(lineVelocity);
-
 	}
+
 	return shapesToDraw;
 }
 
@@ -80,7 +82,7 @@ void Boid::update(const float deltaTime)
 	for (auto& rule : rules) 
 	{
 		sf::Vector2f weightedForce = rule->computeWeightedForce(neighbordhood, this);
-		std::cout << typeid(*rule).name() << " Force : " << vector2::getMagnitude(weightedForce) << std::endl;
+		//std::cout << typeid(*rule).name() << " Force : " << vector2::getMagnitude(weightedForce) << std::endl;
 		applyForce(weightedForce);
 	}
 

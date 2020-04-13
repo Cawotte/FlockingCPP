@@ -2,6 +2,7 @@
 
 
 #include "SFML/Graphics.hpp"
+#include "FlockingRule.h"
 
 class Particle;
 
@@ -15,8 +16,8 @@ private:
 	const int antialiasing = 8;
 	const int maxFramerate = 60;
 
-	const int heightWindow = 800;
-	const int widthWindow = 600;
+	const int widthWindow = 1200;
+	const int heightWindow = 600;
 
 	int nbBoids = 15;
 	float baseSpeed = 100.;
@@ -25,11 +26,27 @@ private:
 	sf::RenderWindow* window_ptr;
 	std::vector<Particle*> particles;
 
+	//Configuration
+	std::map<FlockingRule*, bool*> boidsRules;
+	float* defaultWeights; //array of default rules weight
+	float detectionRadius = 50.f;
+	bool showRadius = true;
+	bool showRuleVectors = true;
+
+
 
 	///Methods
 	sf::Vector2f getDirectionFromKeyboardInputs();
 
 	void warpParticleIfOutOfBounds(Particle& particle);
+
+	void showConfigurationWindow();
+
+	void applyConfigurationToAllBoids();
+	void setNumberOfBoids(int number);
+
+
+	std::vector<Boid*> getAllBoids();
 
 public:
 

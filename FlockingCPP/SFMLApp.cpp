@@ -72,34 +72,218 @@ void SFMLApp::warpParticleIfOutOfBounds(Particle& particle)
 	}
 }
 
+void SFMLApp::showConfigurationWindow()
+{
+
+	ImGui::Begin("Configuration"); // begin window
+
+	ImGui::Text("Control the simulation with those settings.");
+	ImGui::Spacing();
+	ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.45f);
+
+	if (ImGui::CollapsingHeader("General"))
+	{
+
+		if (ImGui::DragInt("Number of Boids", &nbBoids)) 
+		{
+			if (nbBoids < 0)
+				nbBoids = 0;
+			setNumberOfBoids(nbBoids);
+		}
+
+		if (ImGui::SliderFloat("Neighborhood Radius", &detectionRadius, 0.0f, 300.0f, "%.f"))
+		{
+			std::vector<Boid*> boids = getAllBoids();
+			for (const auto& boid : boids)
+			{
+				boid->setDetectionRadius(detectionRadius);
+			}
+		}
+
+		if (ImGui::Checkbox("Show Radius", &showRadius))
+		{
+			std::vector<Boid*> boids = getAllBoids();
+			for (const auto& boid : boids)
+			{
+				boid->drawDebugRadius = showRadius;
+			}
+		}
+
+		if (ImGui::Checkbox("Show Rules", &showRuleVectors))
+		{
+			std::vector<Boid*> boids = getAllBoids();
+			for (const auto& boid : boids)
+			{
+				boid->drawDebugRules = showRuleVectors;
+			}
+		}
+	}
+
+	if (ImGui::CollapsingHeader("Rules"))
+	{
+		int i = 0;
+		for (std::pair<FlockingRule*, bool*> rule : boidsRules)
+		{
+			i++;
+			ImGui::PushID(i);
+
+			std::string rulename(typeid(*rule.first).name());
+			rulename = rulename.substr(6); //remove "class "
+
+			ImGui::BulletText(rulename.c_str());
+			if (ImGui::Checkbox("Enabled", &(*rule.second)))
+			{
+				//When the value is changed
+				//Update rules
+				applyConfigurationToAllBoids();
+			}
+
+			//ImGui::SliderFloat("##", &rule.first->weight, 0.0f, 100.0f, "weight = %.2f");
+			ImGui::DragFloat("Weight##", &rule.first->weight, 0.05f);
+
+
+			//Rule name and ID
+
+			ImGui::PopID();
+		}
+
+		if (ImGui::Button("Restore Default Weights"))
+		{
+			int i = 0;
+			//restore default values
+			for (std::pair<FlockingRule*, bool*> rule : boidsRules)
+			{
+				rule.first->weight = defaultWeights[i++];
+			}
+		}
+
+	}
+
+	ImGui::End(); // end window
+}
+
+void SFMLApp::applyConfigurationToAllBoids()
+{
+
+	//Get Boids list
+	std::vector<Boid*> boids = getAllBoids();
+
+	//Construct new rules vector
+	std::vector<FlockingRule*> rules;
+
+	// Create a map iterator and point to beginning of map
+	std::map<FlockingRule*, bool*>::iterator it = boidsRules.begin();
+
+	// Iterate over the map using c++11 range based for loop
+	for (std::pair<FlockingRule*, bool*> rule : boidsRules)
+	{
+		if (*rule.second)
+		{
+			rules.push_back(rule.first);
+		}
+	}
+
+	//For each boid
+	for (const auto& boid : boids)
+	{
+		boid->setFlockingRules(rules);
+	}
+
+}
+
+void SFMLApp::setNumberOfBoids(int number)
+{
+
+	int diff = particles.size() - number;
+
+	if (diff == 0) 
+	{
+		return;
+	}
+	//Need to add boids
+	else if (diff < 0)
+	{
+		//Back to positive
+		diff = -diff;
+
+		//Add boids equal to diff
+		for (int i = 0; i < diff; i++)
+		{
+			//Create new boid
+			Boid* boid = new Boid(&particles);
+			boid->setPosition(vector2::getRandom(widthWindow, heightWindow));
+			boid->setVelocity(vector2::getVector2FromDegree(rand() % 180) * baseSpeed); //Random dir
+
+			particles.push_back(boid);
+		}
+	}
+	//Too much boid, remove them
+	else
+	{
+		//Remove from end
+		for (int i = 0; i < diff; i++)
+		{
+			Particle* p = particles.back();
+			particles.pop_back();
+
+			Boid* boid = dynamic_cast<Boid*>(p);
+
+			if (boid != nullptr) {
+
+				delete boid; //clean memory
+			}
+		}
+	
+	}
+}
+
+std::vector<Boid*> SFMLApp::getAllBoids()
+{
+	std::vector<Boid*> boids;
+
+	for (const auto& p : particles)
+	{
+		Boid* boid = dynamic_cast<Boid*>(p);
+
+		if (boid != nullptr) {
+			boids.push_back(boid);
+		}
+	}
+
+	return boids;
+}
+
 int SFMLApp::run()
 {
 	/// Initialization windows & settings
 	sf::ContextSettings settings;
 	settings.antialiasingLevel = antialiasing;
 
-	sf::RenderWindow window(sf::VideoMode(heightWindow, widthWindow), "Boids !", sf::Style::Default, settings);
+	sf::RenderWindow window(sf::VideoMode(widthWindow, heightWindow), "Boids !", sf::Style::Default, settings);
 	window.setFramerateLimit(maxFramerate);
 	ImGui::SFML::Init(window);
 
 	window_ptr = &window;
 
 
-	particles = std::vector<Particle*>();
-	particles.reserve(nbBoids);
-	for (int i = 0; i < nbBoids; i++) {
+	//INITIALIZE RULES
 
-		//New boids with random starting positions
-		Boid* boid = new Boid(&particles);
-		boid->setPosition(vector2::getRandom(heightWindow, widthWindow));
-		boid->setVelocity(vector2::getVector2FromDegree(rand() % 180) * baseSpeed); //Random dir
+	boidsRules.emplace(new SeparationRule(600), new bool(true));
+	boidsRules.emplace(new CohesionRule(0.2), new bool(true));
+	boidsRules.emplace(new AlignmentRule(0.05), new bool(true)); 
 
-		if (i == 0) {
-			boid->drawDebug = true;
-		}
-		particles.push_back(boid);
+	defaultWeights = new float[boidsRules.size()];
+	int i = 0;
+	//save default values
+	for (std::pair<FlockingRule*, bool*> rule : boidsRules)
+	{
+		defaultWeights[i++] = rule.first->weight;
 	}
 
+	setNumberOfBoids(nbBoids);
+
+	applyConfigurationToAllBoids();
+	
 
 	sf::Clock deltaClock;
 
@@ -148,32 +332,9 @@ int SFMLApp::run()
 
 		ImGui::SFML::Update(window, deltaTime);
 
-		ImGui::Begin("Sample window"); // begin window
-
-		//Sample
-		sf::Color bgColor;
-		float color[3] = { 0.f, 0.f, 0.f };
-		char windowTitle[255] = "ImGui + SFML = <3";
-
-									   // Background color edit
-		if (ImGui::ColorEdit3("Background color", color)) {
-			// this code gets called if color value changes, so
-			// the background color is upgraded automatically!
-			bgColor.r = static_cast<sf::Uint8>(color[0] * 255.f);
-			bgColor.g = static_cast<sf::Uint8>(color[1] * 255.f);
-			bgColor.b = static_cast<sf::Uint8>(color[2] * 255.f);
-		}
-
-		// Window title text edit
-		ImGui::InputText("Window title", windowTitle, 255);
-
-		if (ImGui::Button("Update window title")) {
-			// this code gets if user clicks on the button
-			// yes, you could have written if(ImGui::InputText(...))
-			// but I do this to show how buttons work :)
-			window.setTitle(windowTitle);
-		}
-		ImGui::End(); // end window
+		ImGui::ShowDemoWindow();
+		showConfigurationWindow();
+		
 
 		///DRAW SCENE
 

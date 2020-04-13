@@ -1,11 +1,13 @@
 
 #include "SFMLApp.h"
+#include "imgui.h"
 
 
 //Start of the program
 int main()
 {
 
+	//ImGui::ShowDemoWindow();
 	SFMLApp mainApp;
 
 	return mainApp.run();

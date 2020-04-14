@@ -8,10 +8,7 @@ using namespace utils;
 
 std::vector<Boid*> Boid::computeBoidNeighbordhood()
 {
-	//std::cout << "Size : " << particles->size() << std::endl;
 	std::vector<Boid*> neighborhood;
-
-	//std::cout << "Size : " << neighborhood.size() << std::endl;
 
 	for (const auto& p : *particles)
 	{

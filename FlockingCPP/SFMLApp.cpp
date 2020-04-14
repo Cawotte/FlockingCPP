@@ -50,6 +50,26 @@ sf::Vector2f SFMLApp::getDirectionFromKeyboardInputs()
 	return direction;
 }
 
+std::vector<FlockingRule*> SFMLApp::getFlockingRules()
+{
+	//Construct new rules vector
+	std::vector<FlockingRule*> rules;
+
+	// Create a map iterator and point to beginning of map
+	std::map<FlockingRule*, bool*>::iterator it = boidsRules.begin();
+
+	// Iterate over the map using c++11 range based for loop
+	for (std::pair<FlockingRule*, bool*> rule : boidsRules)
+	{
+		if (*rule.second)
+		{
+			rules.push_back(rule.first);
+		}
+	}
+
+	return rules;
+}
+
 void SFMLApp::warpParticleIfOutOfBounds(Particle& particle)
 {
 	//Correct position with windows borders
@@ -122,6 +142,15 @@ void SFMLApp::showConfigurationWindow()
 				boid->drawDebugRules = showRuleVectors;
 			}
 		}
+
+		if (ImGui::Button("Randomize Boids position and velocity"))
+		{
+			std::vector<Boid*> boids = getAllBoids();
+			for (const auto& boid : boids)
+			{
+				randomizeBoidPositionAndVelocity(*boid);
+			}
+		}
 	}
 
 	if (ImGui::CollapsingHeader("Rules"))
@@ -166,6 +195,8 @@ void SFMLApp::showConfigurationWindow()
 
 	if (ImGui::CollapsingHeader("Performance"))
 	{
+		float framePerSecond = 1. / deltaTime.asSeconds();
+		ImGui::Text("Frames Per Second (FPS) : %.f", framePerSecond);
 		PlotVar("Frame duration (ms)", deltaTime.asMilliseconds());
 		ImGui::Separator();
 		showMemoryInfo();
@@ -226,19 +257,7 @@ void SFMLApp::applyConfigurationToAllBoids()
 	std::vector<Boid*> boids = getAllBoids();
 
 	//Construct new rules vector
-	std::vector<FlockingRule*> rules;
-
-	// Create a map iterator and point to beginning of map
-	std::map<FlockingRule*, bool*>::iterator it = boidsRules.begin();
-
-	// Iterate over the map using c++11 range based for loop
-	for (std::pair<FlockingRule*, bool*> rule : boidsRules)
-	{
-		if (*rule.second)
-		{
-			rules.push_back(rule.first);
-		}
-	}
+	std::vector<FlockingRule*> rules = getFlockingRules();
 
 	//For each boid
 	for (const auto& boid : boids)
@@ -263,15 +282,18 @@ void SFMLApp::setNumberOfBoids(int number)
 		//Back to positive
 		diff = -diff;
 
+		std::vector<FlockingRule*> rules = getFlockingRules();
+
 		//Add boids equal to diff
 		for (int i = 0; i < diff; i++)
 		{
 			//Create new boid
-			Boid* boid = new Boid(&particles);
-			boid->setPosition(vector2::getRandom(widthWindow, heightWindow));
-			boid->setVelocity(vector2::getVector2FromDegree(rand() % 180) * baseSpeed); //Random dir
+			Boid* boid = new Boid(&particles); 
+			randomizeBoidPositionAndVelocity(*boid);
+			boid->setFlockingRules(rules);
 			boid->drawDebugRadius = showRadius;
 			boid->drawDebugRules = showRuleVectors;
+			boid->setDetectionRadius(detectionRadius);
 
 			particles.push_back(boid);
 		}
@@ -294,6 +316,13 @@ void SFMLApp::setNumberOfBoids(int number)
 		}
 	
 	}
+}
+
+void SFMLApp::randomizeBoidPositionAndVelocity(Boid& boid)
+{
+
+	boid.setPosition(vector2::getRandom(widthWindow, heightWindow));
+	boid.setVelocity(vector2::getVector2FromDegree(rand() % 180) * baseSpeed); //Random dir
 }
 
 std::vector<Boid*> SFMLApp::getAllBoids()
@@ -327,8 +356,8 @@ int SFMLApp::run()
 
 	//INITIALIZE RULES
 
-	boidsRules.emplace(new SeparationRule(600), new bool(true));
-	boidsRules.emplace(new CohesionRule(0.2), new bool(true));
+	boidsRules.emplace(new SeparationRule(450), new bool(true));
+	boidsRules.emplace(new CohesionRule(0.5), new bool(true));
 	boidsRules.emplace(new AlignmentRule(0.05), new bool(true)); 
 
 	defaultWeights = new float[boidsRules.size()];
@@ -346,7 +375,6 @@ int SFMLApp::run()
 
 	sf::Clock deltaClock;
 
-	std::cout << "Hellooo : " << particles.size() << std::endl;
 	/// MAIN LOOP
 	while (window.isOpen())
 	{
@@ -368,7 +396,7 @@ int SFMLApp::run()
 
 		if (axisInput != sf::Vector2f()) 
 		{
-			particles[0]->applyForce(axisInput * 5.f);
+			particles[0]->applyForce(axisInput * 20.f);
 		}
 
 		///UPDATE LOGIC

@@ -28,7 +28,7 @@ public:
 
 	//Constructor
 
-	Particle(float size = 8.f, sf::Color color = sf::Color::Green);
+	Particle(float size = 4.f, sf::Color color = sf::Color::Green);
 
 	//Getter / Setters
 	sf::CircleShape* getShape() {

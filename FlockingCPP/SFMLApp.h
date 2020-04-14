@@ -22,7 +22,7 @@ private:
 	const int widthWindow = 1200;
 	const int heightWindow = 600;
 
-	int nbBoids = 15;
+	int nbBoids = 60;
 	float baseSpeed = 100.;
 
 	//Members
@@ -32,7 +32,7 @@ private:
 	//Configuration
 	std::map<FlockingRule*, bool*> boidsRules;
 	float* defaultWeights; //array of default rules weight
-	float detectionRadius = 50.f;
+	float detectionRadius = 40.f;
 	bool showRadius = true;
 	bool showRuleVectors = true;
 
@@ -43,6 +43,8 @@ private:
 	///Methods
 	sf::Vector2f getDirectionFromKeyboardInputs();
 
+	std::vector<FlockingRule*> getFlockingRules();
+
 	void warpParticleIfOutOfBounds(Particle& particle);
 
 	void showConfigurationWindow();
@@ -51,6 +53,7 @@ private:
 
 	void applyConfigurationToAllBoids();
 	void setNumberOfBoids(int number);
+	void randomizeBoidPositionAndVelocity(Boid& boid);
 
 
 	std::vector<Boid*> getAllBoids();

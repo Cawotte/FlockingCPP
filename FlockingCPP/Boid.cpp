@@ -59,7 +59,10 @@ std::vector<sf::Drawable*> Boid::toDraw()
 		//Display rules
 		for (auto& rule : rules)
 		{
-			shapesToDraw.push_back(rule->getVectorShape(this));
+			if (rule->isEnabled)
+			{
+				shapesToDraw.push_back(rule->getVectorShape(this));
+			}
 		}
 	}
 

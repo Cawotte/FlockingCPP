@@ -1,7 +1,6 @@
 #pragma once
 #include "Particle.h"
-
-class FlockingRule;
+#include "FlockingRule.h"
 
 class Boid : public Particle
 {
@@ -32,7 +31,13 @@ public:
 	//Getter - Setters
 	void setFlockingRules(std::vector<FlockingRule*> newRules)
 	{
-		rules = newRules;
+		rules.clear();
+		rules.reserve(newRules.size());
+
+		for (auto& rule : newRules)
+		{
+			rules.push_back(rule->clone());
+		}
 	}
 
 	void setDetectionRadius(float newRadius)

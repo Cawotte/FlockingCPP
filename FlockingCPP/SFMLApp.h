@@ -30,7 +30,7 @@ private:
 	std::vector<Particle*> particles;
 
 	//Configuration
-	std::map<FlockingRule*, bool*> boidsRules;
+	std::vector<FlockingRule*> boidsRules;
 	float* defaultWeights; //array of default rules weight
 	float detectionRadius = 40.f;
 	bool showRadius = true;
@@ -43,7 +43,7 @@ private:
 	///Methods
 	sf::Vector2f getDirectionFromKeyboardInputs();
 
-	std::vector<FlockingRule*> getFlockingRules();
+	//std::vector<FlockingRule*> getFlockingRules();
 
 	void warpParticleIfOutOfBounds(Particle& particle);
 

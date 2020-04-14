@@ -50,25 +50,6 @@ sf::Vector2f SFMLApp::getDirectionFromKeyboardInputs()
 	return direction;
 }
 
-std::vector<FlockingRule*> SFMLApp::getFlockingRules()
-{
-	//Construct new rules vector
-	std::vector<FlockingRule*> rules;
-
-	// Create a map iterator and point to beginning of map
-	std::map<FlockingRule*, bool*>::iterator it = boidsRules.begin();
-
-	// Iterate over the map using c++11 range based for loop
-	for (std::pair<FlockingRule*, bool*> rule : boidsRules)
-	{
-		if (*rule.second)
-		{
-			rules.push_back(rule.first);
-		}
-	}
-
-	return rules;
-}
 
 void SFMLApp::warpParticleIfOutOfBounds(Particle& particle)
 {
@@ -156,27 +137,15 @@ void SFMLApp::showConfigurationWindow()
 	if (ImGui::CollapsingHeader("Rules"))
 	{
 		int i = 0;
-		for (std::pair<FlockingRule*, bool*> rule : boidsRules)
+		for (auto& rule : boidsRules)
 		{
 			i++;
 			ImGui::PushID(i);
 
-			std::string rulename(typeid(*rule.first).name());
-			rulename = rulename.substr(6); //remove "class "
-
-			ImGui::BulletText(rulename.c_str());
-			if (ImGui::Checkbox("Enabled", &(*rule.second)))
+			if (rule->drawImguiRule())
 			{
-				//When the value is changed
-				//Update rules
 				applyConfigurationToAllBoids();
 			}
-
-			//ImGui::SliderFloat("##", &rule.first->weight, 0.0f, 100.0f, "weight = %.2f");
-			ImGui::DragFloat("Weight##", &rule.first->weight, 0.05f);
-
-
-			//Rule name and ID
 
 			ImGui::PopID();
 		}
@@ -185,10 +154,11 @@ void SFMLApp::showConfigurationWindow()
 		{
 			int i = 0;
 			//restore default values
-			for (std::pair<FlockingRule*, bool*> rule : boidsRules)
+			for (auto& rule : boidsRules)
 			{
-				rule.first->weight = defaultWeights[i++];
+				rule->weight = defaultWeights[i++];
 			}
+			applyConfigurationToAllBoids();
 		}
 
 	}
@@ -256,13 +226,10 @@ void SFMLApp::applyConfigurationToAllBoids()
 	//Get Boids list
 	std::vector<Boid*> boids = getAllBoids();
 
-	//Construct new rules vector
-	std::vector<FlockingRule*> rules = getFlockingRules();
-
 	//For each boid
 	for (const auto& boid : boids)
 	{
-		boid->setFlockingRules(rules);
+		boid->setFlockingRules(boidsRules);
 	}
 
 }
@@ -282,15 +249,13 @@ void SFMLApp::setNumberOfBoids(int number)
 		//Back to positive
 		diff = -diff;
 
-		std::vector<FlockingRule*> rules = getFlockingRules();
-
 		//Add boids equal to diff
 		for (int i = 0; i < diff; i++)
 		{
 			//Create new boid
 			Boid* boid = new Boid(&particles); 
 			randomizeBoidPositionAndVelocity(*boid);
-			boid->setFlockingRules(rules);
+			boid->setFlockingRules(boidsRules);
 			boid->drawDebugRadius = showRadius;
 			boid->drawDebugRules = showRuleVectors;
 			boid->setDetectionRadius(detectionRadius);
@@ -356,16 +321,16 @@ int SFMLApp::run()
 
 	//INITIALIZE RULES
 
-	boidsRules.emplace(new SeparationRule(450), new bool(true));
-	boidsRules.emplace(new CohesionRule(0.5), new bool(true));
-	boidsRules.emplace(new AlignmentRule(0.05), new bool(true)); 
+	boidsRules.emplace_back(new SeparationRule(4.50));
+	boidsRules.emplace_back(new CohesionRule(8.));
+	boidsRules.emplace_back(new AlignmentRule(6.));
 
 	defaultWeights = new float[boidsRules.size()];
 	int i = 0;
 	//save default values
-	for (std::pair<FlockingRule*, bool*> rule : boidsRules)
+	for (auto& rule : boidsRules)
 	{
-		defaultWeights[i++] = rule.first->weight;
+		defaultWeights[i++] = rule->weight;
 	}
 
 	setNumberOfBoids(nbBoids);

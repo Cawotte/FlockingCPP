@@ -47,22 +47,17 @@ bool FlockingRule::drawImguiRule()
 	ImGui::BulletText(getRuleName());
 	if (ImGui::Checkbox("Enabled", &isEnabled))
 	{
-		//When the value is changed
-		//Update rules
 		valueHasChanged = true;
 	}
 
-	//ImGui::SliderFloat("##", &rule.first->weight, 0.0f, 100.0f, "weight = %.2f");
-
-	if (ImGui::DragFloat("Weight##", &weight, 0.05f))
+	if (isEnabled)
 	{
-		valueHasChanged = true;
+		if (ImGui::DragFloat("Weight##", &weight, 0.05f))
+		{
+			valueHasChanged = true;
+		}
+
 	}
-
-
-	//Rule name and ID
-
-	//ImGui::PopID();
 
 	return valueHasChanged;
 }
@@ -106,7 +101,7 @@ sf::Vector2f SeparationRule::computeForce(const std::vector<Boid*>& neighbordhoo
 
 		//Each neighbor has an influence proportional to its distance
 		if (distance > 0) {
-			separatingForce += -direction / distance;
+			separatingForce += -direction / exp(distance / 10.f);
 		}
 	}
 
@@ -139,4 +134,78 @@ sf::Vector2f AlignmentRule::computeForce(const std::vector<Boid*>& neighbordhood
 	force = averageVelocity;
 
 	return averageVelocity;
+}
+
+sf::Vector2f WindRule::computeForce(const std::vector<Boid*>& neighbordhood, Boid* boid)
+{
+	return utils::vector2::normalized(utils::vector2::getVector2FromRadian(windAngle));
+}
+
+bool WindRule::drawImguiRule()
+{
+	bool valusHasChanged = FlockingRule::drawImguiRule();
+
+	if (isEnabled)
+	{
+
+		if (ImGui::SliderAngle("Wind Direction", &windAngle, 0))
+		{
+			valusHasChanged = true;
+		}
+
+	}
+	return valusHasChanged;
+}
+
+sf::Vector2f MouseInfluenceRule::computeForce(const std::vector<Boid*>& neighbordhood, Boid* boid)
+{
+
+	ImGuiIO& io = ImGui::GetIO();
+
+	if (ImGui::IsMousePosValid() && io.MouseDown[0])
+	{
+		sf::Vector2f mousePos(io.MousePos.x, io.MousePos.y);
+		sf::Vector2f displacement = mousePos - boid->getPosition();
+		float distance = utils::vector2::getMagnitude(displacement);
+
+		//The force is inversely proportional to distance
+
+		sf::Vector2f force = displacement / exp(distance / 100.f);
+
+		if (isRepulsive)
+		{
+			force *= -1.f;
+		}
+
+		return force;
+	}
+	else 
+	{
+		return sf::Vector2f();
+	}
+
+}
+
+bool MouseInfluenceRule::drawImguiRule()
+{
+
+	bool hasChangedValue = FlockingRule::drawImguiRule();
+
+	if (isEnabled)
+	{
+		if (ImGui::RadioButton("Attractive", !isRepulsive))
+		{
+			isRepulsive = false;
+			hasChangedValue = true;
+		}
+
+		ImGui::SameLine();
+		if (ImGui::RadioButton("Repulsive", isRepulsive))
+		{
+			isRepulsive = true;
+			hasChangedValue = true;
+		}
+	}
+
+	return hasChangedValue;
 }

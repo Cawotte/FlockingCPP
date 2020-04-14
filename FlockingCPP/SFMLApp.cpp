@@ -146,6 +146,7 @@ void SFMLApp::showConfigurationWindow()
 			{
 				applyConfigurationToAllBoids();
 			}
+			ImGui::Separator();
 
 			ImGui::PopID();
 		}
@@ -161,6 +162,7 @@ void SFMLApp::showConfigurationWindow()
 			applyConfigurationToAllBoids();
 		}
 
+		ImGui::Spacing();
 	}
 
 	if (ImGui::CollapsingHeader("Performance"))
@@ -324,6 +326,8 @@ int SFMLApp::run()
 	boidsRules.emplace_back(new SeparationRule(4.50));
 	boidsRules.emplace_back(new CohesionRule(8.));
 	boidsRules.emplace_back(new AlignmentRule(6.));
+	boidsRules.emplace_back(new WindRule(1., 0, false));
+	boidsRules.emplace_back(new MouseInfluenceRule(1.));
 
 	defaultWeights = new float[boidsRules.size()];
 	int i = 0;

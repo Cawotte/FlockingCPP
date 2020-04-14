@@ -33,7 +33,7 @@ private:
 	std::vector<FlockingRule*> boidsRules;
 	float* defaultWeights; //array of default rules weight
 	float detectionRadius = 40.f;
-	bool showRadius = true;
+	bool showRadius = false;
 	bool showRuleVectors = true;
 
 	//Data

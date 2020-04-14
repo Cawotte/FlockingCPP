@@ -157,6 +157,7 @@
     <ClCompile Include="Imgui-SFML\imgui_demo.cpp" />
     <ClCompile Include="Imgui-SFML\imgui_draw.cpp" />
     <ClCompile Include="Imgui-SFML\imgui_widgets.cpp" />
+    <ClCompile Include="ImGuiExtra.cpp" />
     <ClCompile Include="Particle.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="SFMLApp.cpp" />
@@ -165,6 +166,7 @@
   <ItemGroup>
     <ClInclude Include="Boid.h" />
     <ClInclude Include="FlockingRule.h" />
+    <ClInclude Include="ImGuiExtra.h" />
     <ClInclude Include="Particle.h" />
     <ClInclude Include="SFMLApp.h" />
     <ClInclude Include="Utils.hpp" />

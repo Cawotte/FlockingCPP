@@ -4,6 +4,11 @@
 #include "SFML/Window.hpp"
 #include "Utils.hpp"
 #include "Boid.h"
+#include "ImGuiExtra.h"
+
+//Memory
+#include "windows.h"
+#include "psapi.h"
 
 #include "imgui.h"
 #include "imgui-SFML.h"
@@ -159,8 +164,58 @@ void SFMLApp::showConfigurationWindow()
 
 	}
 
+	if (ImGui::CollapsingHeader("Performance"))
+	{
+		PlotVar("Frame Lenght Ms", deltaTime.asMilliseconds());
+		if (ImGui::GetFrameCount() % 240 == 0) {
+			PlotVarFlushOldEntries();
+		}
+		showMemoryInfo();
+	}
+
 	ImGui::End(); // end window
 }
+
+void SFMLApp::showMemoryInfo()
+{
+	MEMORYSTATUSEX memInfo;
+	memInfo.dwLength = sizeof(MEMORYSTATUSEX);
+	GlobalMemoryStatusEx(&memInfo);
+
+	//Total Virtual Memory
+	DWORDLONG totalVirtualMem = memInfo.ullTotalPageFile;
+
+	//Virtual Memory currently used
+	DWORDLONG virtualMemUsed = memInfo.ullTotalPageFile - memInfo.ullAvailPageFile;
+
+	//Virtual Memory current process
+	PROCESS_MEMORY_COUNTERS_EX pmc;
+	GetProcessMemoryInfo(GetCurrentProcess(), (PROCESS_MEMORY_COUNTERS*)&pmc, sizeof(pmc));
+	SIZE_T virtualMemUsedByMe = pmc.PrivateUsage;
+
+	//Total RAM
+	DWORDLONG totalPhysMem = memInfo.ullTotalPhys;
+
+	//Ram Currently Used
+	DWORDLONG physMemUsed = memInfo.ullTotalPhys - memInfo.ullAvailPhys;
+
+	//Ram Current used by Process
+	SIZE_T physMemUsedByMe = pmc.WorkingSetSize;
+
+	int div = 1048576;
+
+	//PC info
+
+	ImGui::Text("Total Virtual Memory : %uMb \n", totalVirtualMem / div);
+	ImGui::Text("Total RAM : %uMb \n", totalPhysMem / div);
+	ImGui::Separator();
+	ImGui::Text("Virtual Memory Currently Used : %iMb \n", virtualMemUsed / div);
+	ImGui::Text("RAM Currently Used : %uMb \n", physMemUsed / div);
+	ImGui::Separator();
+	ImGui::Text("Virtual Memory used by process : %uMb \n", virtualMemUsedByMe / div);
+	ImGui::Text("RAM used by process : %uMb \n", physMemUsedByMe / div);
+}
+
 
 void SFMLApp::applyConfigurationToAllBoids()
 {
@@ -292,7 +347,7 @@ int SFMLApp::run()
 	while (window.isOpen())
 	{
 		//Time between each frames
-		sf::Time deltaTime = deltaClock.restart();
+		deltaTime = deltaClock.restart();
 
 		///EVENTS
 		sf::Event event;
@@ -345,10 +400,9 @@ int SFMLApp::run()
 			
 			//The particle returns all their components to draw
 			std::vector<sf::Drawable*> toDraw = p->toDraw();
-			for (std::vector<sf::Drawable*>::iterator itd = toDraw.begin(); itd != toDraw.end(); itd++)
-			{
-				window.draw(**itd);
-			} 
+			for (auto drawable : toDraw) {
+				window.draw(*drawable);
+			}
 		}
 
 		ImGui::SFML::Render(window);

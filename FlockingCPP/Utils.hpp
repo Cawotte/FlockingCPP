@@ -6,6 +6,7 @@
 //UniqueVector
 #include <vector>
 #include <memory>
+#include <deque>
 
 #include "SFML/Graphics.hpp"
 
@@ -17,8 +18,43 @@ namespace utils {
 		sf::Drawable* getVectorShape(const sf::Vector2f start, const sf::Vector2f vector, const sf::Color color);
 
 	}
+
 	namespace vector {
 
+
+		template<class T>
+		class PlotData
+		{
+
+		public:
+			std::deque<T> data;
+			int maxSize;
+
+			PlotData(int maxSize_) : maxSize(maxSize_)
+			{
+				data.reserve(maxSize_ + 1);
+			}
+
+			void addData(T element)
+			{
+				if (data.size() > maxSize)
+				{
+					data.pop_front();
+				}
+
+				data.push_back(element);
+			}
+
+			T getAverage()
+			{
+				T sum;
+				for (const auto& elm : data)
+				{
+					sum += elm;
+				}
+				return T;
+			}
+		};
 		template<class T>
 		class UniqueVector
 		{

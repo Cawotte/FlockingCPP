@@ -2,9 +2,12 @@
 
 
 #include "SFML/Graphics.hpp"
+
 #include "FlockingRule.h"
+#include "Utils.hpp"
 
 class Particle;
+
 
 class SFMLApp
 {
@@ -33,7 +36,9 @@ private:
 	bool showRadius = true;
 	bool showRuleVectors = true;
 
-
+	//Data
+	//Time between each frames
+	sf::Time deltaTime;
 
 	///Methods
 	sf::Vector2f getDirectionFromKeyboardInputs();
@@ -41,6 +46,8 @@ private:
 	void warpParticleIfOutOfBounds(Particle& particle);
 
 	void showConfigurationWindow();
+	void showMemoryInfo();
+	//void showPlotDataGraph(utils::vector::PlotData<float>& data);
 
 	void applyConfigurationToAllBoids();
 	void setNumberOfBoids(int number);

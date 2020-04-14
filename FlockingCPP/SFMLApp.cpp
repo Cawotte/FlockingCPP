@@ -166,10 +166,8 @@ void SFMLApp::showConfigurationWindow()
 
 	if (ImGui::CollapsingHeader("Performance"))
 	{
-		PlotVar("Frame Lenght Ms", deltaTime.asMilliseconds());
-		if (ImGui::GetFrameCount() % 240 == 0) {
-			PlotVarFlushOldEntries();
-		}
+		PlotVar("Frame duration (ms)", deltaTime.asMilliseconds());
+		ImGui::Separator();
 		showMemoryInfo();
 	}
 
@@ -208,12 +206,16 @@ void SFMLApp::showMemoryInfo()
 
 	ImGui::Text("Total Virtual Memory : %uMb \n", totalVirtualMem / div);
 	ImGui::Text("Total RAM : %uMb \n", totalPhysMem / div);
-	ImGui::Separator();
-	ImGui::Text("Virtual Memory Currently Used : %iMb \n", virtualMemUsed / div);
-	ImGui::Text("RAM Currently Used : %uMb \n", physMemUsed / div);
-	ImGui::Separator();
+
+	//ImGui::Text("Virtual Memory Currently Used : %iMb \n", virtualMemUsed / div);
+	//ImGui::Text("RAM Currently Used : %uMb \n", physMemUsed / div);
+	//ImGui::Separator();
+
 	ImGui::Text("Virtual Memory used by process : %uMb \n", virtualMemUsedByMe / div);
+	PlotVar("Virtual Memory Consumption (Mb)", virtualMemUsedByMe / div);
+
 	ImGui::Text("RAM used by process : %uMb \n", physMemUsedByMe / div);
+	PlotVar("Ram Consumption (Mb)", physMemUsedByMe / div);
 }
 
 
@@ -268,6 +270,8 @@ void SFMLApp::setNumberOfBoids(int number)
 			Boid* boid = new Boid(&particles);
 			boid->setPosition(vector2::getRandom(widthWindow, heightWindow));
 			boid->setVelocity(vector2::getVector2FromDegree(rand() % 180) * baseSpeed); //Random dir
+			boid->drawDebugRadius = showRadius;
+			boid->drawDebugRules = showRuleVectors;
 
 			particles.push_back(boid);
 		}
@@ -398,11 +402,20 @@ int SFMLApp::run()
 		//Draw each boid
 		for (auto& p : particles) {
 			
+			int i = 0;
 			//The particle returns all their components to draw
 			std::vector<sf::Drawable*> toDraw = p->toDraw();
 			for (auto drawable : toDraw) {
 				window.draw(*drawable);
+
+				//Ignore the main shape. UGLY HACK
+				if (i > 0) 
+				{
+					delete drawable;
+				}
+				i++;
 			}
+			toDraw.clear();
 		}
 
 		ImGui::SFML::Render(window);

@@ -35,10 +35,7 @@ std::vector<Boid*> Boid::computeBoidNeighbordhood()
 
 Boid::Boid(std::vector<Particle*>* particles_) : Particle(), particles(particles_)
 {
-	/*
-	rules.push_back(new SeparationRule(600));
-	rules.push_back(new CohesionRule(0.2));
-	rules.push_back(new AlignmentRule(0.05)); */
+
 }
 
 std::vector<sf::Drawable*> Boid::toDraw()
@@ -62,7 +59,6 @@ std::vector<sf::Drawable*> Boid::toDraw()
 
 	if (drawDebugRules)
 	{
-
 		//Display rules
 		for (auto& rule : rules)
 		{

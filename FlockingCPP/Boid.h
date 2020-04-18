@@ -13,7 +13,7 @@ private:
 
 	float detectionRadius = 100.;
 
-	std::vector<FlockingRule*> rules;
+	std::vector<std::unique_ptr<FlockingRule>> rules;
 
 	//Methods
 	std::vector<Boid*> computeBoidNeighbordhood();
@@ -29,10 +29,11 @@ public:
 	Boid(std::vector<Particle*>* particles_);
 
 	//Getter - Setters
-	void setFlockingRules(std::vector<FlockingRule*> newRules)
+	void setFlockingRules(std::vector<std::unique_ptr<FlockingRule>> const& newRules)
 	{
 		rules.clear();
-		rules.reserve(newRules.size());
+
+		//Clone the rules in newRules in the boid rules.
 
 		for (auto& rule : newRules)
 		{

@@ -43,7 +43,7 @@ public:
 	//Copy constructor
 	FlockingRule(const FlockingRule& toCopy);
 
-	virtual FlockingRule* clone() = 0;
+	virtual std::unique_ptr<FlockingRule> clone() = 0;
 
 
 	sf::Vector2f computeWeightedForce(const std::vector<Boid*>& neighbordhood, Boid* boid);
@@ -52,7 +52,7 @@ public:
 
 
 	// Inherited via Drawable
-	virtual void draw(const Boid boid, sf::RenderTarget& target, sf::RenderStates states = sf::RenderStates::Default) const;
+	virtual void draw(const Boid &boid, sf::RenderTarget& target, sf::RenderStates states = sf::RenderStates::Default) const;
 
 };
 
@@ -64,9 +64,10 @@ public:
 
 	CohesionRule(float weight = 1., bool isEnabled = true) : FlockingRule(sf::Color::Cyan, weight, isEnabled)  {}
 
-	FlockingRule* clone() override 
+	std::unique_ptr<FlockingRule> clone() override
 	{
-		return new CohesionRule(*this);
+		// Créer un pointeur concret en utilisant le constructeur abstrait parent
+		return std::make_unique<CohesionRule>(*this);
 	}
 
 	const char* getRuleName() override
@@ -95,9 +96,9 @@ public:
 
 	SeparationRule(float weight = 1., bool isEnabled = true) : FlockingRule(sf::Color::Red, weight, isEnabled) {}
 
-	FlockingRule* clone() override
+	std::unique_ptr<FlockingRule> clone() override
 	{
-		return new SeparationRule(*this);
+		return std::make_unique<SeparationRule>(*this);
 	}
 
 	const char* getRuleName() override
@@ -128,9 +129,9 @@ public:
 
 	
 
-	FlockingRule* clone() override
+	std::unique_ptr<FlockingRule> clone() override
 	{
-		return new AlignmentRule(*this);
+		return std::make_unique<AlignmentRule>(*this);
 	}
 
 	const char* getRuleName() override
@@ -157,19 +158,20 @@ private:
 
 	float windAngle;
 
-	WindRule(const WindRule& toCopy) : FlockingRule(toCopy)
-	{
-		windAngle = toCopy.windAngle;
-	}
-
 public:
 
 	WindRule(float weight = 1., float angle = 0, bool isEnabled = true) : FlockingRule(sf::Color::White, weight, isEnabled), windAngle(angle)
 	{}
 
-	FlockingRule* clone() override
+	WindRule(const WindRule & toCopy) : FlockingRule(toCopy)
 	{
-		return new WindRule(*this);
+		windAngle = toCopy.windAngle;
+	}
+
+
+	std::unique_ptr<FlockingRule> clone() override
+	{
+		return std::make_unique<WindRule>(*this);
 	}
 
 	const char* getRuleName() override
@@ -200,18 +202,21 @@ private:
 	//If not avoiding, is attracted
 	bool isRepulsive;
 
+
+
+public:
+
+	MouseInfluenceRule(float weight = 1., bool isRepulsive_ = false, bool isEnabled = true) : FlockingRule(sf::Color::Magenta, weight, isEnabled), isRepulsive(isRepulsive_)
+	{}
+
 	MouseInfluenceRule(const MouseInfluenceRule& toCopy) : FlockingRule(toCopy)
 	{
 		isRepulsive = toCopy.isRepulsive;
 	}
 
-public:
-	MouseInfluenceRule(float weight = 1., bool isRepulsive_ = false, bool isEnabled = true) : FlockingRule(sf::Color::Magenta, weight, isEnabled), isRepulsive(isRepulsive_)
-	{}
-
-	FlockingRule* clone() override
+	std::unique_ptr<FlockingRule> clone() override
 	{
-		return new MouseInfluenceRule(*this);
+		return std::make_unique<MouseInfluenceRule>(*this);
 	}
 
 

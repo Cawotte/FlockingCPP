@@ -70,13 +70,16 @@ void Boid::draw(sf::RenderTarget& target, sf::RenderStates states) const
 
 	if (drawDebugRules)
 	{
+		
 		//Display rules
+		
 		for (auto& rule : rules)
 		{
 			if (rule->isEnabled)
 			{
 				rule->draw(*this, target, states);
 			}
-		}
+		} 
+		
 	}
 }

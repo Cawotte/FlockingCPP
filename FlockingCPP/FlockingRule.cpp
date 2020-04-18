@@ -61,7 +61,7 @@ bool FlockingRule::drawImguiRule()
 	return valueHasChanged;
 }
 
-void FlockingRule::draw(const Boid boid, sf::RenderTarget& target, sf::RenderStates states) const
+void FlockingRule::draw(const Boid& boid, sf::RenderTarget& target, sf::RenderStates states) const
 {
 	graphics::drawVector(target, states, boid.getPosition(), force, debugColor);
 }

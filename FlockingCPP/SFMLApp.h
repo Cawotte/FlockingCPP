@@ -30,7 +30,7 @@ private:
 	std::vector<Particle*> particles;
 
 	//Configuration
-	std::vector<FlockingRule*> boidsRules;
+	std::vector<std::unique_ptr<FlockingRule>> boidsRules;
 	float* defaultWeights; //array of default rules weight
 	float maxSpeed = 90.f;
 	float detectionRadius = 40.f;

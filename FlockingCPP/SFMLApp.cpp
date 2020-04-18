@@ -80,6 +80,9 @@ void SFMLApp::warpParticleIfOutOfBounds(Particle& particle)
 
 void SFMLApp::showConfigurationWindow()
 {
+	//Resized once at first windows appearance
+	ImGui::SetNextWindowPos(ImVec2(850, 20), ImGuiCond_Once);
+	ImGui::SetNextWindowSize(ImVec2(320, 550), ImGuiCond_Once);
 
 	ImGui::Begin("Configuration"); // begin window
 
@@ -87,6 +90,7 @@ void SFMLApp::showConfigurationWindow()
 	ImGui::Spacing();
 	ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.45f);
 
+	ImGui::SetNextItemOpen(true, ImGuiCond_Once); //Next header is opened by default
 	if (ImGui::CollapsingHeader("General"))
 	{
 
@@ -97,12 +101,23 @@ void SFMLApp::showConfigurationWindow()
 			setNumberOfBoids(nbBoids);
 		}
 
-		if (ImGui::SliderFloat("Neighborhood Radius", &detectionRadius, 0.0f, 300.0f, "%.f"))
+		ImGui::SameLine(); HelpMarker("Drag to change the weight's value or CTRL+Click to input a new value.");
+
+		if (ImGui::SliderFloat("Neighborhood Radius", &detectionRadius, 0.0f, 250.0f, "%.f"))
 		{
 			std::vector<Boid*> boids = getAllBoids();
 			for (const auto& boid : boids)
 			{
 				boid->setDetectionRadius(detectionRadius);
+			}
+		}
+
+		if (ImGui::SliderFloat("Max Speed", &maxSpeed, 0.0f, 300.0f, "%.f"))
+		{
+			std::vector<Boid*> boids = getAllBoids();
+			for (const auto& boid : boids)
+			{
+				boid->setMaxSpeed(maxSpeed);
 			}
 		}
 
@@ -134,6 +149,7 @@ void SFMLApp::showConfigurationWindow()
 		}
 	}
 
+	ImGui::SetNextItemOpen(true, ImGuiCond_Once); //Next header is opened by default
 	if (ImGui::CollapsingHeader("Rules"))
 	{
 		int i = 0;
@@ -258,9 +274,10 @@ void SFMLApp::setNumberOfBoids(int number)
 			Boid* boid = new Boid(&particles); 
 			randomizeBoidPositionAndVelocity(*boid);
 			boid->setFlockingRules(boidsRules);
+			boid->setDetectionRadius(detectionRadius);
+			boid->setMaxSpeed(maxSpeed);
 			boid->drawDebugRadius = showRadius;
 			boid->drawDebugRules = showRuleVectors;
-			boid->setDetectionRadius(detectionRadius);
 
 			particles.push_back(boid);
 		}
@@ -289,7 +306,7 @@ void SFMLApp::randomizeBoidPositionAndVelocity(Boid& boid)
 {
 
 	boid.setPosition(vector2::getRandom(widthWindow, heightWindow));
-	boid.setVelocity(vector2::getVector2FromDegree(rand() % 180) * baseSpeed); //Random dir
+	boid.setVelocity(vector2::getVector2FromDegree(rand() % 360) * baseSpeed); //Random dir
 }
 
 std::vector<Boid*> SFMLApp::getAllBoids()
@@ -323,11 +340,11 @@ int SFMLApp::run()
 
 	//INITIALIZE RULES
 
-	boidsRules.emplace_back(new SeparationRule(4.50));
-	boidsRules.emplace_back(new CohesionRule(8.));
-	boidsRules.emplace_back(new AlignmentRule(6.));
+	boidsRules.emplace_back(new SeparationRule(15.));
+	boidsRules.emplace_back(new CohesionRule(5.5));
+	boidsRules.emplace_back(new AlignmentRule(4.));
+	boidsRules.emplace_back(new MouseInfluenceRule(3.));
 	boidsRules.emplace_back(new WindRule(1., 0, false));
-	boidsRules.emplace_back(new MouseInfluenceRule(1.));
 
 	defaultWeights = new float[boidsRules.size()];
 	int i = 0;
@@ -388,7 +405,7 @@ int SFMLApp::run()
 
 		ImGui::SFML::Update(window, deltaTime);
 
-		ImGui::ShowDemoWindow();
+		//ImGui::ShowDemoWindow();
 		showConfigurationWindow();
 		
 
@@ -399,20 +416,7 @@ int SFMLApp::run()
 		//Draw each boid
 		for (auto& p : particles) {
 			
-			int i = 0;
-			//The particle returns all their components to draw
-			std::vector<sf::Drawable*> toDraw = p->toDraw();
-			for (auto drawable : toDraw) {
-				window.draw(*drawable);
-
-				//Ignore the main shape. UGLY HACK
-				if (i > 0) 
-				{
-					delete drawable;
-				}
-				i++;
-			}
-			toDraw.clear();
+			p->draw(window);
 		}
 
 		ImGui::SFML::Render(window);

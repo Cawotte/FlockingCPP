@@ -14,9 +14,8 @@ namespace utils {
 
 	namespace graphics {
 
-		/* Get a Drawable line for SFML, show the given vector from the starting point with the given color */
-		sf::Drawable* getVectorShape(const sf::Vector2f start, const sf::Vector2f vector, const sf::Color color);
-
+		/* Draw a line SFML, show the given vector from the starting point with the given color */
+		void drawVector(sf::RenderTarget& target, sf::RenderStates states, const sf::Vector2f start, const sf::Vector2f vector, const sf::Color color);
 	}
 
 	namespace vector {

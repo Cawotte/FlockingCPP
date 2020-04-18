@@ -74,3 +74,21 @@ void PlotVarFlushOldEntries()
 	}
 }
 
+void HelpMarker(const char* desc)
+{
+	ImGui::TextDisabled("(?)");
+	ImguiTooltip(desc);
+}
+
+
+void ImguiTooltip(const char* desc)
+{
+	if (ImGui::IsItemHovered())
+	{
+		ImGui::BeginTooltip();
+		ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+		ImGui::TextUnformatted(desc);
+		ImGui::PopTextWrapPos();
+		ImGui::EndTooltip();
+	}
+}

@@ -45,12 +45,11 @@ public:
 		detectionRadius = newRadius;
 	}
 
-
-	//Methods
-	std::vector<sf::Drawable*> toDraw() override;
-
 	void update(const float deltaTime) override;
 
+
+	// Inherited via Drawable
+	virtual void draw(sf::RenderTarget& target, sf::RenderStates states = sf::RenderStates::Default) const override;
 
 };
 

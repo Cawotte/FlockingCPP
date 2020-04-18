@@ -3,14 +3,10 @@
 #include "Utils.hpp"
 #include "Boid.h"
 #include "imgui.h"
+#include "ImGuiExtra.h"
 
 
 using namespace utils;
-
-sf::Drawable* FlockingRule::getVectorShape(Boid* boid)
-{
-	return graphics::getVectorShape(boid->getPosition(), force, debugColor);
-}
 
 FlockingRule::FlockingRule(const FlockingRule& toCopy)
 {
@@ -45,6 +41,7 @@ bool FlockingRule::drawImguiRule()
 	//rulename = rulename.substr(6); //remove "class "
 
 	ImGui::BulletText(getRuleName());
+	ImguiTooltip(getRuleExplanation());
 	if (ImGui::Checkbox("Enabled", &isEnabled))
 	{
 		valueHasChanged = true;
@@ -52,14 +49,21 @@ bool FlockingRule::drawImguiRule()
 
 	if (isEnabled)
 	{
-		if (ImGui::DragFloat("Weight##", &weight, 0.05f))
+		if (ImGui::DragFloat("Weight##", &weight, 0.025f))
 		{
 			valueHasChanged = true;
 		}
 
+		ImGui::SameLine(); HelpMarker("Drag to change the weight's value or CTRL+Click to input a new value.");
+
 	}
 
 	return valueHasChanged;
+}
+
+void FlockingRule::draw(const Boid boid, sf::RenderTarget& target, sf::RenderStates states) const
+{
+	graphics::drawVector(target, states, boid.getPosition(), force, debugColor);
 }
 
 sf::Vector2f CohesionRule::computeForce(const std::vector<Boid*>& neighbordhood, Boid* boid)
@@ -101,7 +105,7 @@ sf::Vector2f SeparationRule::computeForce(const std::vector<Boid*>& neighbordhoo
 
 		//Each neighbor has an influence proportional to its distance
 		if (distance > 0) {
-			separatingForce += -direction / exp(distance / 10.f);
+			separatingForce += -direction / exp(distance / 1000.f);
 		}
 	}
 
@@ -136,6 +140,8 @@ sf::Vector2f AlignmentRule::computeForce(const std::vector<Boid*>& neighbordhood
 	return averageVelocity;
 }
 
+///WIND 
+
 sf::Vector2f WindRule::computeForce(const std::vector<Boid*>& neighbordhood, Boid* boid)
 {
 	return utils::vector2::normalized(utils::vector2::getVector2FromRadian(windAngle));
@@ -156,6 +162,8 @@ bool WindRule::drawImguiRule()
 	}
 	return valusHasChanged;
 }
+
+/// MOUSE
 
 sf::Vector2f MouseInfluenceRule::computeForce(const std::vector<Boid*>& neighbordhood, Boid* boid)
 {

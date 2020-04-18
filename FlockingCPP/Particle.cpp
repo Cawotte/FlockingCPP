@@ -16,14 +16,6 @@ Particle::Particle(float size, sf::Color color)
 
 //Public Methods
 
-std::vector<sf::Drawable*> Particle::toDraw()
-{
-	std::vector<sf::Drawable*> drawables;
-
-	drawables.push_back(getShape());
-
-	return drawables;
-}
 
 void Particle::applyForce(sf::Vector2f force)
 {
@@ -53,11 +45,14 @@ void Particle::updatePosition(const float deltaTime)
 	shape.move(velocity * deltaTime);
 }
 
+void Particle::draw(sf::RenderTarget& target, sf::RenderStates states) const
+{
+	target.draw(shape);
+}
+
 //Private Methods
-
-
 
 void Particle::resetAcceleration()
 {
-	acceleration = utils::vector2::zero();
+	acceleration = sf::Vector2f();
 }

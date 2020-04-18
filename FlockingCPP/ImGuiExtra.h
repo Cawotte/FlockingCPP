@@ -8,3 +8,7 @@ void	PlotVar(const char* label, float value, float scale_min = FLT_MAX, float sc
 // Call this periodically to discard old/unused data
 void	PlotVarFlushOldEntries();
 
+//Tooltip from imgui_demo
+void HelpMarker(const char* desc);
+
+void ImguiTooltip(const char* desc);

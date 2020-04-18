@@ -5,7 +5,7 @@
 #include "SFML/Graphics.hpp"
 #include "Utils.hpp"
 
-class Particle
+class Particle : public sf::Drawable
 {
 
 private:
@@ -13,7 +13,6 @@ private:
 	//Members
 	float maxSpeed = 120.;
 
-	sf::CircleShape shape;
 
 	sf::Vector2f velocity;
 	sf::Vector2f acceleration;
@@ -23,6 +22,7 @@ private:
 
 protected:
 
+	sf::CircleShape shape;
 
 public:
 
@@ -35,7 +35,7 @@ public:
 		return &shape;
 	}
 
-	sf::Vector2f getPosition() {
+	sf::Vector2f getPosition() const {
 		return shape.getPosition();
 	}
 
@@ -53,8 +53,12 @@ public:
 		shape.setRotation(utils::vector2::getAngleDegree(velocity));
 	}
 
+	void setMaxSpeed(float newMaxSpeed)
+	{
+		maxSpeed = newMaxSpeed;
+	}
+
 	//Methods
-	virtual std::vector<sf::Drawable*> toDraw();
 
 	void applyForce(sf::Vector2f force);
 
@@ -63,6 +67,8 @@ public:
 	virtual void updatePosition(const float deltaTime);
 
 
+	// Inherited via Drawable
+	virtual void draw(sf::RenderTarget& target, sf::RenderStates states = sf::RenderStates::Default) const override;
 
 };
 

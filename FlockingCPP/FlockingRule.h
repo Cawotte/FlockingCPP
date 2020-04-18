@@ -32,13 +32,13 @@ protected:
 
 	virtual const char* getRuleName() = 0;
 
+	virtual const char* getRuleExplanation() = 0;
+
 public:
 
 	float weight;
 
 	bool isEnabled;
-
-	sf::Drawable* getVectorShape(Boid* boid);
 
 	//Copy constructor
 	FlockingRule(const FlockingRule& toCopy);
@@ -50,6 +50,9 @@ public:
 
 	virtual bool drawImguiRule();
 
+
+	// Inherited via Drawable
+	virtual void draw(const Boid boid, sf::RenderTarget& target, sf::RenderStates states = sf::RenderStates::Default) const;
 
 };
 
@@ -69,6 +72,11 @@ public:
 	const char* getRuleName() override
 	{
 		return "Cohesion Rule";
+	}
+
+	const char* getRuleExplanation() override
+	{
+		return "Steer to move toward center of mass of nearby boids.";
 	}
 
 	virtual float getBaseWeightMultiplier() override
@@ -97,9 +105,14 @@ public:
 		return "Separation Rule";
 	}
 
+	const char* getRuleExplanation() override
+	{
+		return "Steer to avoid collision with nearby boids.";
+	}
+
 	virtual float getBaseWeightMultiplier() override
 	{
-		return 100.;
+		return 1.;
 	}
 
 	sf::Vector2f computeForce(const std::vector<Boid*>& neighbordhood, Boid* boid) override;
@@ -124,7 +137,12 @@ public:
 	{
 		return "Alignment Rule";
 	}	
-	
+
+	const char* getRuleExplanation() override
+	{
+		return "Steer to move in the same direction that nearby boids.";
+	}
+
 	virtual float getBaseWeightMultiplier() override
 	{
 		return .01;
@@ -159,9 +177,14 @@ public:
 		return "Wind Force";
 	}
 
+	const char* getRuleExplanation() override
+	{
+		return "Apply a constant force to all boids.";
+	}
+
 	virtual float getBaseWeightMultiplier() override
 	{
-		return 1;
+		return 100.;
 	}
 
 	sf::Vector2f computeForce(const std::vector<Boid*>& neighbordhood, Boid* boid) override;
@@ -195,6 +218,11 @@ public:
 	const char* getRuleName() override
 	{
 		return "Mouse Click Influence";
+	}
+
+	const char* getRuleExplanation() override
+	{
+		return "Steer toward or away the mouse when clicked.";
 	}
 
 	virtual float getBaseWeightMultiplier() override

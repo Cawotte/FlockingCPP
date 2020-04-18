@@ -35,40 +35,6 @@ Boid::Boid(std::vector<Particle*>* particles_) : Particle(), particles(particles
 
 }
 
-std::vector<sf::Drawable*> Boid::toDraw()
-{
-	std::vector<sf::Drawable*> shapesToDraw = Particle::toDraw();
-
-	if (drawDebugRadius) {
-
-		//Display radius detection
-		sf::CircleShape* vision = new sf::CircleShape(detectionRadius);
-
-		vision->setFillColor(sf::Color::Transparent);
-		vision->setOutlineThickness(1.);
-		vision->setOrigin(vision->getRadius(), vision->getRadius());
-		vision->setOutlineColor(sf::Color::Blue);
-		vision->setPosition(getPosition());
-
-		shapesToDraw.push_back(vision);
-
-	}
-
-	if (drawDebugRules)
-	{
-		//Display rules
-		for (auto& rule : rules)
-		{
-			if (rule->isEnabled)
-			{
-				shapesToDraw.push_back(rule->getVectorShape(this));
-			}
-		}
-	}
-
-	return shapesToDraw;
-}
-
 void Boid::update(const float deltaTime)
 {
 	Particle::update(deltaTime);
@@ -82,4 +48,35 @@ void Boid::update(const float deltaTime)
 		applyForce(weightedForce);
 	}
 
+}
+
+void Boid::draw(sf::RenderTarget& target, sf::RenderStates states) const
+{
+	Particle::draw(target, states); //super()
+
+	if (drawDebugRadius) {
+
+		//Display radius detection
+		sf::CircleShape vision = sf::CircleShape(detectionRadius);
+
+		vision.setFillColor(sf::Color::Transparent);
+		vision.setOutlineThickness(1.);
+		vision.setOrigin(vision.getRadius(), vision.getRadius());
+		vision.setOutlineColor(sf::Color::Blue);
+		vision.setPosition(shape.getPosition());
+
+		target.draw(vision, states);
+	}
+
+	if (drawDebugRules)
+	{
+		//Display rules
+		for (auto& rule : rules)
+		{
+			if (rule->isEnabled)
+			{
+				rule->draw(*this, target, states);
+			}
+		}
+	}
 }

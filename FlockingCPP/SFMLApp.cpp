@@ -54,7 +54,7 @@ sf::Vector2f SFMLApp::getDirectionFromKeyboardInputs()
 void SFMLApp::warpParticleIfOutOfBounds(Particle& particle)
 {
 	//Correct position with windows borders
-	sf::Vector2f position = particle.getShape()->getPosition();
+	sf::Vector2f position = particle.getShape().getPosition();
 	sf::Vector2u sizeWindow = window_ptr->getSize();
 
 	if (position.x < 0) {
@@ -72,9 +72,9 @@ void SFMLApp::warpParticleIfOutOfBounds(Particle& particle)
 	}
 
 	//If the position changed
-	if (position != particle.getShape()->getPosition())
+	if (position != particle.getShape().getPosition())
 	{
-		particle.getShape()->setPosition(position);
+		particle.setPosition(position);
 	}
 }
 
@@ -149,16 +149,17 @@ void SFMLApp::showConfigurationWindow()
 		}
 	}
 
-	ImGui::SetNextItemOpen(true, ImGuiCond_Once); //Next header is opened by default
+	//ImGui::SetNextItemOpen(true, ImGuiCond_Once); //Next header is opened by default
 	if (ImGui::CollapsingHeader("Rules"))
 	{
 		int i = 0;
 		for (auto& rule : boidsRules)
 		{
 			i++;
+			//Necessary to avoid similar ID and linked variables
 			ImGui::PushID(i);
 
-			if (rule->drawImguiRule())
+			if (rule->drawImguiRule()) //display the UI and returns true if a value has been changed
 			{
 				applyConfigurationToAllBoids();
 			}

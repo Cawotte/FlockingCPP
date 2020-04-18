@@ -31,15 +31,15 @@ public:
 	Particle(float size = 4.f, sf::Color color = sf::Color::Green);
 
 	//Getter / Setters
-	sf::CircleShape* getShape() {
-		return &shape;
+	sf::CircleShape getShape() const {
+		return shape;
 	}
 
 	sf::Vector2f getPosition() const {
 		return shape.getPosition();
 	}
 
-	sf::Vector2f getVelocity() {
+	sf::Vector2f getVelocity() const {
 		return velocity;
 	}
 

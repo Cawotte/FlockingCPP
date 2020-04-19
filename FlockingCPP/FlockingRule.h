@@ -92,9 +92,15 @@ public:
 class SeparationRule : public FlockingRule
 {
 
+private:
+
+	float desiredMinimalDistance = 10;
+
 public:
 
-	SeparationRule(float weight = 1., bool isEnabled = true) : FlockingRule(sf::Color::Red, weight, isEnabled) {}
+	SeparationRule(float desiredSeparation = 20., float weight = 1., bool isEnabled = true) : 
+		FlockingRule(sf::Color::Red, weight, isEnabled), desiredMinimalDistance(desiredSeparation) 
+	{}
 
 	std::unique_ptr<FlockingRule> clone() override
 	{
@@ -113,10 +119,14 @@ public:
 
 	virtual float getBaseWeightMultiplier() override
 	{
-		return 1.;
+		return 100.;
 	}
 
+
 	sf::Vector2f computeForce(const std::vector<Boid*>& neighbordhood, Boid* boid) override;
+
+	bool drawImguiRule() override;
+
 };
 
 /* Steer toward average heading of local flockmates */

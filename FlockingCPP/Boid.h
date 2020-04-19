@@ -46,6 +46,11 @@ public:
 		detectionRadius = newRadius;
 	}
 
+	float getDetectionRadius() const
+	{
+		return detectionRadius;
+	}
+
 	void update(const float deltaTime) override;
 
 

@@ -341,16 +341,11 @@ int SFMLApp::run()
 
 	//INITIALIZE RULES
 
-	boidsRules.emplace_back(std::make_unique<SeparationRule>(15.));
-	boidsRules.emplace_back(std::make_unique<CohesionRule>(5.5));
-	boidsRules.emplace_back(std::make_unique<AlignmentRule>(4.));
-	boidsRules.emplace_back(std::make_unique<MouseInfluenceRule>(3.));
+	boidsRules.emplace_back(std::make_unique<SeparationRule>(25., 7.));
+	boidsRules.emplace_back(std::make_unique<CohesionRule>(13.));
+	boidsRules.emplace_back(std::make_unique<AlignmentRule>(6.));
+	boidsRules.emplace_back(std::make_unique<MouseInfluenceRule>(2.));
 	boidsRules.emplace_back(std::make_unique<WindRule>(1., 0, false));
-	/*
-	boidsRules.emplace_back(new CohesionRule(5.5));
-	boidsRules.emplace_back(new AlignmentRule(4.));
-	boidsRules.emplace_back(new MouseInfluenceRule(3.));
-	boidsRules.emplace_back(new WindRule(1., 0, false)); */
 
 	defaultWeights = new float[boidsRules.size()];
 	int i = 0;

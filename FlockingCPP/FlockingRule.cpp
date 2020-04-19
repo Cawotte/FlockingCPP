@@ -82,7 +82,7 @@ sf::Vector2f CohesionRule::computeForce(const std::vector<Boid*>& neighbordhood,
 		//Get direction toward center of mass
 		sf::Vector2f towardCenter = centerOfMass - boid->getPosition();
 
-		force = towardCenter;
+		force = vector2::normalized(towardCenter);
 	}
 	else 
 	{
@@ -94,6 +94,7 @@ sf::Vector2f CohesionRule::computeForce(const std::vector<Boid*>& neighbordhood,
 
 sf::Vector2f SeparationRule::computeForce(const std::vector<Boid*>& neighbordhood, Boid* boid)
 {
+
 	//Try to avoid boids too close
 	sf::Vector2f separatingForce;
 
@@ -101,11 +102,14 @@ sf::Vector2f SeparationRule::computeForce(const std::vector<Boid*>& neighbordhoo
 	{
 		Boid* flockmate = (*it);
 		float distance = vector2::getDistance(boid->getPosition(), flockmate->getPosition());
-		sf::Vector2f direction = vector2::normalized(flockmate->getPosition() - boid->getPosition());
 
-		//Each neighbor has an influence proportional to its distance
-		if (distance > 0) {
-			separatingForce += -direction / exp(distance / 1000.f);
+		if (distance < desiredMinimalDistance && distance > 0)
+		{
+			sf::Vector2f direction = vector2::normalized(flockmate->getPosition() - boid->getPosition());
+
+			separatingForce += -direction / distance;
+			//Each neighbor has an influence proportional to its distance
+			//separatingForce += -direction / exp(distance / 1000.f);
 		}
 	}
 
@@ -115,8 +119,25 @@ sf::Vector2f SeparationRule::computeForce(const std::vector<Boid*>& neighbordhoo
 	}
 
 	force = separatingForce;
+	//force = vector2::normalized(separatingForce);
 
 	return separatingForce;
+}
+
+bool SeparationRule::drawImguiRule()
+{
+	bool valusHasChanged = FlockingRule::drawImguiRule();
+
+	if (isEnabled)
+	{
+
+		if (ImGui::DragFloat("Desired Separation", &desiredMinimalDistance, 0.05f))
+		{
+			valusHasChanged = true;
+		}
+
+	}
+	return valusHasChanged;
 }
 
 sf::Vector2f AlignmentRule::computeForce(const std::vector<Boid*>& neighbordhood, Boid* boid)

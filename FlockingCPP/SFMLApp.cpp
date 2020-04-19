@@ -2,7 +2,6 @@
 
 #include <iostream>
 #include "SFML/Window.hpp"
-#include "Utils.hpp"
 #include "Boid.h"
 #include "ImGuiExtra.h"
 
@@ -51,33 +50,6 @@ sf::Vector2f SFMLApp::getDirectionFromKeyboardInputs()
 }
 
 
-void SFMLApp::warpParticleIfOutOfBounds(Particle& particle)
-{
-	//Correct position with windows borders
-	sf::Vector2f position = particle.getShape().getPosition();
-	sf::Vector2u sizeWindow = window_ptr->getSize();
-
-	if (position.x < 0) {
-		position.x += sizeWindow.x;
-	}
-	else if (position.x > sizeWindow.x) {
-		position.x -= sizeWindow.x;
-	}
-
-	if (position.y < 0) {
-		position.y += sizeWindow.y;
-	}
-	else if (position.y > sizeWindow.y) {
-		position.y -= sizeWindow.y;
-	}
-
-	//If the position changed
-	if (position != particle.getShape().getPosition())
-	{
-		particle.setPosition(position);
-	}
-}
-
 void SFMLApp::showConfigurationWindow()
 {
 	//Resized once at first windows appearance
@@ -90,241 +62,71 @@ void SFMLApp::showConfigurationWindow()
 	ImGui::Spacing();
 	ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.45f);
 
-	ImGui::SetNextItemOpen(true, ImGuiCond_Once); //Next header is opened by default
-	if (ImGui::CollapsingHeader("General"))
-	{
-
-		if (ImGui::DragInt("Number of Boids", &nbBoids)) 
-		{
-			if (nbBoids < 0)
-				nbBoids = 0;
-			setNumberOfBoids(nbBoids);
-		}
-
-		ImGui::SameLine(); HelpMarker("Drag to change the weight's value or CTRL+Click to input a new value.");
-
-		if (ImGui::SliderFloat("Neighborhood Radius", &detectionRadius, 0.0f, 250.0f, "%.f"))
-		{
-			std::vector<Boid*> boids = getAllBoids();
-			for (const auto& boid : boids)
-			{
-				boid->setDetectionRadius(detectionRadius);
-			}
-		}
-
-		if (ImGui::SliderFloat("Max Speed", &maxSpeed, 0.0f, 300.0f, "%.f"))
-		{
-			std::vector<Boid*> boids = getAllBoids();
-			for (const auto& boid : boids)
-			{
-				boid->setMaxSpeed(maxSpeed);
-			}
-		}
-
-		if (ImGui::Checkbox("Show Radius", &showRadius))
-		{
-			std::vector<Boid*> boids = getAllBoids();
-			for (const auto& boid : boids)
-			{
-				boid->drawDebugRadius = showRadius;
-			}
-		}
-
-		if (ImGui::Checkbox("Show Rules", &showRuleVectors))
-		{
-			std::vector<Boid*> boids = getAllBoids();
-			for (const auto& boid : boids)
-			{
-				boid->drawDebugRules = showRuleVectors;
-			}
-		}
-
-		if (ImGui::Button("Randomize Boids position and velocity"))
-		{
-			std::vector<Boid*> boids = getAllBoids();
-			for (const auto& boid : boids)
-			{
-				randomizeBoidPositionAndVelocity(*boid);
-			}
-		}
-	}
+	world->drawGeneralUI();
 
 	//ImGui::SetNextItemOpen(true, ImGuiCond_Once); //Next header is opened by default
-	if (ImGui::CollapsingHeader("Rules"))
-	{
-		int i = 0;
-		for (auto& rule : boidsRules)
-		{
-			i++;
-			//Necessary to avoid similar ID and linked variables
-			ImGui::PushID(i);
 
-			if (rule->drawImguiRule()) //display the UI and returns true if a value has been changed
-			{
-				applyConfigurationToAllBoids();
-			}
-			ImGui::Separator();
+	world->drawRulesUI();
 
-			ImGui::PopID();
-		}
-
-		if (ImGui::Button("Restore Default Weights"))
-		{
-			int i = 0;
-			//restore default values
-			for (auto& rule : boidsRules)
-			{
-				rule->weight = defaultWeights[i++];
-			}
-			applyConfigurationToAllBoids();
-		}
-
-		ImGui::Spacing();
-	}
-
-	if (ImGui::CollapsingHeader("Performance"))
-	{
-		float framePerSecond = 1. / deltaTime.asSeconds();
-		ImGui::Text("Frames Per Second (FPS) : %.f", framePerSecond);
-		PlotVar("Frame duration (ms)", deltaTime.asMilliseconds());
-		ImGui::Separator();
-		showMemoryInfo();
-	}
+	drawPerformanceUI();
 
 	ImGui::End(); // end window
 }
 
-void SFMLApp::showMemoryInfo()
+void SFMLApp::drawPerformanceUI()
 {
-	MEMORYSTATUSEX memInfo;
-	memInfo.dwLength = sizeof(MEMORYSTATUSEX);
-	GlobalMemoryStatusEx(&memInfo);
-
-	//Total Virtual Memory
-	DWORDLONG totalVirtualMem = memInfo.ullTotalPageFile;
-
-	//Virtual Memory currently used
-	DWORDLONG virtualMemUsed = memInfo.ullTotalPageFile - memInfo.ullAvailPageFile;
-
-	//Virtual Memory current process
-	PROCESS_MEMORY_COUNTERS_EX pmc;
-	GetProcessMemoryInfo(GetCurrentProcess(), (PROCESS_MEMORY_COUNTERS*)&pmc, sizeof(pmc));
-	SIZE_T virtualMemUsedByMe = pmc.PrivateUsage;
-
-	//Total RAM
-	DWORDLONG totalPhysMem = memInfo.ullTotalPhys;
-
-	//Ram Currently Used
-	DWORDLONG physMemUsed = memInfo.ullTotalPhys - memInfo.ullAvailPhys;
-
-	//Ram Current used by Process
-	SIZE_T physMemUsedByMe = pmc.WorkingSetSize;
-
-	int div = 1048576;
-
-	//PC info
-
-	ImGui::Text("Total Virtual Memory : %uMb \n", totalVirtualMem / div);
-	ImGui::Text("Total RAM : %uMb \n", totalPhysMem / div);
-
-	//ImGui::Text("Virtual Memory Currently Used : %iMb \n", virtualMemUsed / div);
-	//ImGui::Text("RAM Currently Used : %uMb \n", physMemUsed / div);
-	//ImGui::Separator();
-
-	ImGui::Text("Virtual Memory used by process : %uMb \n", virtualMemUsedByMe / div);
-	PlotVar("Virtual Memory Consumption (Mb)", virtualMemUsedByMe / div);
-
-	ImGui::Text("RAM used by process : %uMb \n", physMemUsedByMe / div);
-	PlotVar("Ram Consumption (Mb)", physMemUsedByMe / div);
-}
-
-
-void SFMLApp::applyConfigurationToAllBoids()
-{
-
-	//Get Boids list
-	std::vector<Boid*> boids = getAllBoids();
-
-	//For each boid
-	for (const auto& boid : boids)
+	if (ImGui::CollapsingHeader("Performance"))
 	{
-		boid->setFlockingRules(boidsRules);
-	}
+		///FPS Count
+		float framePerSecond = 1. / deltaTime.asSeconds();
+		ImGui::Text("Frames Per Second (FPS) : %.f", framePerSecond);
+		PlotVar("Frame duration (ms)", deltaTime.asMilliseconds());
+		ImGui::Separator();
 
-}
+		///CPU and RAM
+		MEMORYSTATUSEX memInfo;
+		memInfo.dwLength = sizeof(MEMORYSTATUSEX);
+		GlobalMemoryStatusEx(&memInfo);
 
-void SFMLApp::setNumberOfBoids(int number)
-{
+		//Total Virtual Memory
+		DWORDLONG totalVirtualMem = memInfo.ullTotalPageFile;
 
-	int diff = particles.size() - number;
+		//Virtual Memory currently used
+		DWORDLONG virtualMemUsed = memInfo.ullTotalPageFile - memInfo.ullAvailPageFile;
 
-	if (diff == 0) 
-	{
-		return;
-	}
-	//Need to add boids
-	else if (diff < 0)
-	{
-		//Back to positive
-		diff = -diff;
+		//Virtual Memory current process
+		PROCESS_MEMORY_COUNTERS_EX pmc;
+		GetProcessMemoryInfo(GetCurrentProcess(), (PROCESS_MEMORY_COUNTERS*)&pmc, sizeof(pmc));
+		SIZE_T virtualMemUsedByMe = pmc.PrivateUsage;
 
-		//Add boids equal to diff
-		for (int i = 0; i < diff; i++)
-		{
-			//Create new boid
-			Boid* boid = new Boid(&particles); 
-			randomizeBoidPositionAndVelocity(*boid);
-			boid->setFlockingRules(boidsRules);
-			boid->setDetectionRadius(detectionRadius);
-			boid->setMaxSpeed(maxSpeed);
-			boid->drawDebugRadius = showRadius;
-			boid->drawDebugRules = showRuleVectors;
+		//Total RAM
+		DWORDLONG totalPhysMem = memInfo.ullTotalPhys;
 
-			particles.push_back(boid);
-		}
-	}
-	//Too much boid, remove them
-	else
-	{
-		//Remove from end
-		for (int i = 0; i < diff; i++)
-		{
-			Particle* p = particles.back();
-			particles.pop_back();
+		//Ram Currently Used
+		DWORDLONG physMemUsed = memInfo.ullTotalPhys - memInfo.ullAvailPhys;
 
-			Boid* boid = dynamic_cast<Boid*>(p);
+		//Ram Current used by Process
+		SIZE_T physMemUsedByMe = pmc.WorkingSetSize;
 
-			if (boid != nullptr) {
+		int div = 1048576;
 
-				delete boid; //clean memory
-			}
-		}
-	
+		//PC info
+
+		ImGui::Text("Total Virtual Memory : %uMb \n", totalVirtualMem / div);
+		ImGui::Text("Total RAM : %uMb \n", totalPhysMem / div);
+
+		//ImGui::Text("Virtual Memory Currently Used : %iMb \n", virtualMemUsed / div);
+		//ImGui::Text("RAM Currently Used : %uMb \n", physMemUsed / div);
+		//ImGui::Separator();
+
+		ImGui::Text("Virtual Memory used by process : %uMb \n", virtualMemUsedByMe / div);
+		PlotVar("Virtual Memory Consumption (Mb)", virtualMemUsedByMe / div);
+
+		ImGui::Text("RAM used by process : %uMb \n", physMemUsedByMe / div);
+		PlotVar("Ram Consumption (Mb)", physMemUsedByMe / div);
 	}
 }
 
-void SFMLApp::randomizeBoidPositionAndVelocity(Boid& boid)
-{
-
-	boid.setPosition(vector2::getRandom(widthWindow, heightWindow));
-	boid.setVelocity(vector2::getVector2FromDegree(rand() % 360) * baseSpeed); //Random dir
-}
-
-std::vector<Boid*> SFMLApp::getAllBoids()
-{
-	std::vector<Boid*> boids;
-
-	for (const auto& p : particles)
-	{
-		Boid* boid = dynamic_cast<Boid*>(p);
-
-		if (boid != nullptr) {
-			boids.push_back(boid);
-		}
-	}
-
-	return boids;
-}
 
 int SFMLApp::run()
 {
@@ -332,34 +134,13 @@ int SFMLApp::run()
 	sf::ContextSettings settings;
 	settings.antialiasingLevel = antialiasing;
 
-	sf::RenderWindow window(sf::VideoMode(widthWindow, heightWindow), "Boids !", sf::Style::Default, settings);
+	sf::RenderWindow window(sf::VideoMode(widthWindow, heightWindow), "Boids Simulation", sf::Style::Default, settings);
 	window.setFramerateLimit(maxFramerate);
 	ImGui::SFML::Init(window);
 
-	window_ptr = &window;
-
-
-	//INITIALIZE RULES
-
-	boidsRules.emplace_back(std::make_unique<SeparationRule>(25., 7.));
-	boidsRules.emplace_back(std::make_unique<CohesionRule>(13.));
-	boidsRules.emplace_back(std::make_unique<AlignmentRule>(6.));
-	boidsRules.emplace_back(std::make_unique<MouseInfluenceRule>(2.));
-	boidsRules.emplace_back(std::make_unique<WindRule>(1., 0, false));
-
-	defaultWeights = new float[boidsRules.size()];
-	int i = 0;
-	//save default values
-	for (auto& rule : boidsRules)
-	{
-		defaultWeights[i++] = rule->weight;
-	}
-
-	setNumberOfBoids(nbBoids);
-
-	applyConfigurationToAllBoids();
+	//INITIALIZE WORLD
+	world = std::make_unique<World>(&window);
 	
-
 	sf::Clock deltaClock;
 
 	/// MAIN LOOP
@@ -381,26 +162,22 @@ int SFMLApp::run()
 		///REALTIME INPUTS
 		sf::Vector2f axisInput = getDirectionFromKeyboardInputs();
 
-		if (axisInput != sf::Vector2f()) 
+		if (axisInput != sf::Vector2f() && world->getNbBoids() > 0) 
 		{
-			particles[0]->applyForce(axisInput * 20.f);
+			Boid* firstBoid = *world->getAllBoids()->begin();
+			firstBoid->applyForce(axisInput * 20.f);
 		}
 
 		///UPDATE LOGIC
 
 		//update each boid logic
-		for (auto& p : particles) {
-			p->update(deltaTime.asSeconds());
-		}
+		world->update(deltaTime.asSeconds());
 
 		/* Update logic and position are separated so the movement calculations don't 
-		take into account the new positions of other boid */
+		take into account the new positions of other boids */
 
 		//Update their position
-		for (auto& p : particles) {
-			p->updatePosition(deltaTime.asSeconds());
-			warpParticleIfOutOfBounds(*p);
-		}
+		world->updatePositions(deltaTime.asSeconds());
 
 		///IMGUI UI
 
@@ -415,9 +192,9 @@ int SFMLApp::run()
 		window.clear();
 
 		//Draw each boid
-		for (auto& p : particles) {
-			
-			p->draw(window);
+		for (auto& b : *world->getAllBoids()) 
+		{
+			b->draw(window);
 		}
 
 		ImGui::SFML::Render(window);

@@ -9,7 +9,7 @@ private:
 
 	//Reference to all particles
 
-	std::vector<Particle*>* particles;
+	std::vector<Boid*>* boids;
 
 	float detectionRadius = 100.;
 
@@ -26,7 +26,7 @@ public:
 	bool drawDebugRules = true;
 
 	//Constructor
-	Boid(std::vector<Particle*>* particles_);
+	Boid(std::vector<Boid*>* boids_);
 
 	//Getter - Setters
 	void setFlockingRules(std::vector<std::unique_ptr<FlockingRule>> const& newRules)

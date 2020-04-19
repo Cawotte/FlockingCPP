@@ -10,11 +10,9 @@ std::vector<Boid*> Boid::computeBoidNeighbordhood()
 {
 	std::vector<Boid*> neighborhood;
 
-	for (const auto& p : *particles)
+	for (const auto& boid : *boids)
 	{
-		Boid* boid = dynamic_cast<Boid*>(p);
-
-		if (boid != nullptr && boid != this) {
+		if (boid != this) {
 
 			float distance = vector2::getDistance(getPosition(), boid->getPosition());
 			//Verify if boid is close enough to be part of the neighborhood
@@ -30,7 +28,7 @@ std::vector<Boid*> Boid::computeBoidNeighbordhood()
 }
 
 
-Boid::Boid(std::vector<Particle*>* particles_) : Particle(), particles(particles_)
+Boid::Boid(std::vector<Boid*>* boids_) : Particle(), boids(boids_)
 {
 
 }

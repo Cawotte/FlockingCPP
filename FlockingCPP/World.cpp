@@ -160,7 +160,6 @@ void World::drawGeneralUI()
 
 		if (ImGui::SliderFloat("Max Speed", &maxSpeed, 0.0f, 300.0f, "%.f"))
 		{
-		{
 			for (const auto& boid : boids)
 			{
 				boid->setMaxSpeed(maxSpeed);
@@ -168,6 +167,7 @@ void World::drawGeneralUI()
 		}
 
 		if (ImGui::Checkbox("Show Radius", &showRadius))
+		{
 			for (const auto& boid : boids)
 			{
 				boid->drawDebugRadius = showRadius;

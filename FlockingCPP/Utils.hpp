@@ -18,94 +18,6 @@ namespace utils {
 		void drawVector(sf::RenderTarget& target, sf::RenderStates states, const sf::Vector2f start, const sf::Vector2f vector, const sf::Color color);
 	}
 
-	namespace vector {
-
-
-		template<class T>
-		class PlotData
-		{
-
-		public:
-			std::deque<T> data;
-			int maxSize;
-
-			PlotData(int maxSize_) : maxSize(maxSize_)
-			{
-				data.reserve(maxSize_ + 1);
-			}
-
-			void addData(T element)
-			{
-				if (data.size() > maxSize)
-				{
-					data.pop_front();
-				}
-
-				data.push_back(element);
-			}
-
-			T getAverage()
-			{
-				T sum;
-				for (const auto& elm : data)
-				{
-					sum += elm;
-				}
-				return T;
-			}
-		};
-		template<class T>
-		class UniqueVector
-		{
-
-		private:
-
-			std::vector<std::unique_ptr<T>> master;
-
-
-		public:
-
-			UniqueVector() {}
-
-			UniqueVector(int size) : master(std::vector<std::unique_ptr<T>>(size)) {}
-
-			std::vector<std::unique_ptr<T>>* getMaster()
-			{
-				return &master;
-			}
-
-			std::vector<const T*> getAllEntries()
-			{
-				std::vector<const T*> entries;
-
-				for (auto const& ptr : master) {
-
-					entries.push_back(ptr.get());
-				}
-				return entries;
-			}
-
-			template <class V>
-			std::vector<V*> getEntriesOfType()
-			{
-				std::vector<V*> entries;
-
-				for (auto const& ptr : master)
-				{
-					V* elm = dynamic_cast<V*>(ptr.get());
-
-					//Add to list elm if of desired type
-					if (elm != nullptr) {
-						entries.push_back(elm);
-					}
-
-				}
-				return entries;
-			}
-
-		};
-
-	}
 	namespace vector2 {
 
 		//DECLARATION
@@ -177,12 +89,6 @@ namespace utils {
 		Vec2 left()
 		{
 			return Vec2(-1., 0.);
-		}
-
-		template <class Vec2>
-		Vec2 zero()
-		{
-			return Vec2(0., 0.);
 		}
 	
 		//Methods

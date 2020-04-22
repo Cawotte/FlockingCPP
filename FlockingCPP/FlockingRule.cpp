@@ -238,3 +238,55 @@ bool MouseInfluenceRule::drawImguiRule()
 
 	return hasChangedValue;
 }
+
+sf::Vector2f BoundedAreaRule::computeForce(const std::vector<Boid*>& neighbordhood, Boid* boid)
+{
+	//Return a force proportional to the proximity of the boids with the bounds, and opposed to it
+
+	sf::Vector2f force; //zero
+
+	//Too close from min
+	if (boid->getPosition().x < desiredDistance)
+	{
+		force.x += desiredDistance / boid->getPosition().x; //car position.x = distance de 0 à x.
+	}
+	//Too close from max
+	else if (boid->getPosition().x > widthWindows - desiredDistance)
+	{
+		int d = boid->getPosition().x - widthWindows;
+		if (d == 0) d = 1000; //avoid div by zero
+		force.x += desiredDistance / d;
+	}
+
+	//Too close from min
+	if (boid->getPosition().y < desiredDistance)
+	{
+		force.y += desiredDistance / boid->getPosition().y; 
+	}
+	//Too close from max
+	else if (boid->getPosition().y > heightWindows - desiredDistance)
+	{
+		int d = boid->getPosition().y - heightWindows;
+		if (d == 0) d = 1000; //avoid div by zero
+		force.y += desiredDistance / d;
+	}
+
+	return force;
+}
+
+bool BoundedAreaRule::drawImguiRule()
+{
+
+	bool valueHasChanged = FlockingRule::drawImguiRule();
+	if (isEnabled)
+	{
+		//We cap the max separation as the third of the min of the width.height
+		int minHeightWidth = std::min(widthWindows, heightWindows);
+		if (ImGui::SliderInt("Desired Distance From Borders", &desiredDistance, 0.0f, minHeightWidth / 3, "%i"))
+		{
+			valueHasChanged = true;
+		}
+
+	}
+	return valueHasChanged;
+}

@@ -16,7 +16,9 @@ void World::initializeRules()
 	boidsRules.emplace_back(std::make_unique<CohesionRule>(13.));
 	boidsRules.emplace_back(std::make_unique<AlignmentRule>(6.));
 	boidsRules.emplace_back(std::make_unique<MouseInfluenceRule>(2.));
-	boidsRules.emplace_back(std::make_unique<WindRule>(1., 0, false));
+	boidsRules.emplace_back(std::make_unique<BoundedAreaRule>(
+		windowPtr->getSize().y, windowPtr->getSize().x, 100, 4., false));
+	boidsRules.emplace_back(std::make_unique<WindRule>(1., 330, false));
 
 	//Starting weights are saved as defaults
 	defaultWeights = new float[boidsRules.size()];
@@ -158,6 +160,7 @@ void World::drawGeneralUI()
 
 		if (ImGui::SliderFloat("Max Speed", &maxSpeed, 0.0f, 300.0f, "%.f"))
 		{
+		{
 			for (const auto& boid : boids)
 			{
 				boid->setMaxSpeed(maxSpeed);
@@ -165,7 +168,6 @@ void World::drawGeneralUI()
 		}
 
 		if (ImGui::Checkbox("Show Radius", &showRadius))
-		{
 			for (const auto& boid : boids)
 			{
 				boid->drawDebugRadius = showRadius;

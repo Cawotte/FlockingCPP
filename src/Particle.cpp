@@ -1,0 +1,58 @@
+#include "Particle.h"
+
+
+Particle::Particle(float size, sf::Color color)
+{
+	this->shape = sf::CircleShape(size, 3);
+	shape.setFillColor(color);
+	shape.setOrigin(shape.getRadius(), shape.getRadius());
+	shape.setPosition(sf::Vector2f());
+
+	velocity = sf::Vector2f();
+	acceleration = sf::Vector2f();
+
+}
+
+
+//Public Methods
+
+
+void Particle::applyForce(sf::Vector2f force)
+{
+	acceleration += force;
+}
+
+void Particle::update(const float deltaTime)
+{
+
+	//Compute acceleration
+
+}
+
+void Particle::updatePosition(const float deltaTime)
+{
+	//Apply acceleration to velocity
+	setVelocity(velocity + acceleration);
+
+	resetAcceleration();
+
+	//If velocity too high, cap it
+	if (utils::vector2::getMagnitude(velocity) > maxSpeed) 
+	{
+		setVelocity(utils::vector2::normalized(velocity) * maxSpeed);
+	}
+
+	shape.move(velocity * deltaTime);
+}
+
+void Particle::draw(sf::RenderTarget& target, sf::RenderStates states) const
+{
+	target.draw(shape);
+}
+
+//Private Methods
+
+void Particle::resetAcceleration()
+{
+	acceleration = sf::Vector2f();
+}

@@ -290,3 +290,21 @@ bool BoundedAreaRule::drawImguiRule()
 	}
 	return valueHasChanged;
 }
+
+void BoundedAreaRule::draw(const Boid& boid, sf::RenderTarget& target, sf::RenderStates states) const
+{
+
+	FlockingRule::draw(boid, target, states);
+
+	//Draw a rectangle on the map
+
+	sf::RectangleShape bound(sf::Vector2f(widthWindows - 2 * desiredDistance, heightWindows - 2 * desiredDistance));
+	bound.setOutlineColor(debugColor);
+	bound.setOutlineThickness(1); //1 pixel outline
+	bound.setFillColor(sf::Color::Transparent); //Transparent inside, we just draw the box bound
+	bound.setPosition(desiredDistance, desiredDistance);
+
+	target.draw(bound, states);
+
+
+}

@@ -1,14 +1,22 @@
 #include "Utils.hpp"
 
-void utils::graphics::drawVector(sf::RenderTarget& target, sf::RenderStates states, const sf::Vector2f start, const sf::Vector2f vector, const sf::Color color)
-{
 
-	sf::VertexArray line = sf::VertexArray(sf::Lines, 2);
-	line[0] = start;
-	line[1] = start + vector;
+namespace utils {
 
-	line[0].color = color;
-	line[1].color = color;
+	namespace graphics {
 
-	target.draw(line, states);
+
+		void drawVector(sf::RenderTarget& target, sf::RenderStates states, const sf::Vector2f start, const sf::Vector2f vector, const sf::Color color)
+		{
+
+			sf::VertexArray line = sf::VertexArray(sf::Lines, 2);
+			line[0] = start;
+			line[1] = start + vector;
+
+			line[0].color = color;
+			line[1].color = color;
+
+			target.draw(line, states);
+		}
+	}
 }

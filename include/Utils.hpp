@@ -14,6 +14,18 @@ namespace utils {
 
 	namespace graphics {
 
+		//Extra colors for SFML
+		
+		static const sf::Color Gray(130, 130, 130);
+		static const sf::Color LightRed(245, 88, 122);
+		static const sf::Color Orange(255, 107, 15);
+		static const sf::Color LightOrange(245, 197, 66);
+		static const sf::Color LimeGreen(140, 245, 66);
+		static const sf::Color LightBlue(66, 188, 245);
+		static const sf::Color DarkBlue(91, 15, 255);
+		static const sf::Color Purple(138, 66, 245);
+		static const sf::Color Pink(245, 88, 232);
+
 		/* Draw a line SFML, show the given vector from the starting point with the given color */
 		void drawVector(sf::RenderTarget& target, sf::RenderStates states, const sf::Vector2f start, const sf::Vector2f vector, const sf::Color color);
 	}

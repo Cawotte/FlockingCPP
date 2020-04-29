@@ -2,6 +2,7 @@
 
 
 #include "SFML/Graphics.hpp"
+#include "Utils.hpp"
 
 class Boid;
 
@@ -257,7 +258,6 @@ class BoundedAreaRule : public FlockingRule
 
 private:
 
-	//If not avoiding, is attracted
 	int widthWindows;
 	int heightWindows;
 
@@ -265,8 +265,8 @@ private:
 
 public:
 
-	BoundedAreaRule(int heightWindows_, int widthWindows_, int distanceFromBorder_, float weight = 1., bool isEnabled = true) : 
-		FlockingRule(sf::Color::Green, weight, isEnabled), widthWindows(widthWindows_), heightWindows(heightWindows_), desiredDistance(distanceFromBorder_)
+	BoundedAreaRule(int heightWindows_, int widthWindows_, int distanceFromBorder_, float weight = 1., bool isEnabled = true) :
+		FlockingRule(utils::graphics::LightRed, weight, isEnabled), widthWindows(widthWindows_), heightWindows(heightWindows_), desiredDistance(distanceFromBorder_)
 	{}
 
 	BoundedAreaRule(const BoundedAreaRule& toCopy) : FlockingRule(toCopy)
@@ -300,5 +300,8 @@ public:
 	sf::Vector2f computeForce(const std::vector<Boid*>& neighbordhood, Boid* boid) override;
 
 	bool drawImguiRule() override;
+
+
+	virtual void draw(const Boid& boid, sf::RenderTarget& target, sf::RenderStates states = sf::RenderStates::Default) const override;
 
 };

@@ -18,12 +18,12 @@ void World::initializeRules()
 	boidsRules.emplace_back(std::make_unique<MouseInfluenceRule>(2.));
 	boidsRules.emplace_back(std::make_unique<BoundedAreaRule>(
 		windowPtr->getSize().y, windowPtr->getSize().x, 80, 3.5, false));
-	boidsRules.emplace_back(std::make_unique<WindRule>(1., 330, false));
+	boidsRules.emplace_back(std::make_unique<WindRule>(1., 6.f, false));
 
 	//Starting weights are saved as defaults
 	defaultWeights = new float[boidsRules.size()];
 	int i = 0;
-	for (auto& rule : boidsRules)
+	for (const auto& rule : boidsRules)
 	{
 		defaultWeights[i++] = rule->weight;
 	}
@@ -162,6 +162,7 @@ void World::drawGeneralUI()
 
 		//Speeds
 
+		ImGui::SetNextItemOpen(false, ImGuiCond_Once);
 		if (ImGui::TreeNode("Movement Settings"))
 		{
 
@@ -197,6 +198,7 @@ void World::drawGeneralUI()
 					}
 				}
 			}
+			ImguiTooltip("Boids keeps more momentum when the acceleration is capped.");
 
 			if (hasMaxAcceleration)
 			{
@@ -213,6 +215,7 @@ void World::drawGeneralUI()
 		}
 
 
+		ImGui::SetNextItemOpen(true, ImGuiCond_Once);
 		if (ImGui::TreeNode("Display Settings"))
 		{
 

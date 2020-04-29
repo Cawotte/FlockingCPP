@@ -31,7 +31,7 @@ private:
 
 	//Display
 	bool showRadius = false;
-	bool showRules = true;
+	bool showRules = false;
 	bool showAcceleration = false;
 
 	//rules

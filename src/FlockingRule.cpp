@@ -37,6 +37,8 @@ bool FlockingRule::drawImguiRule()
 {
 	bool valueHasChanged = false;
 
+
+	ImGui::SetNextItemOpen(isEnabled, ImGuiCond_Once); //Opened by default if rule active
 	if (ImGui::TreeNode(getRuleName())) 
 	{
 		ImguiTooltip(getRuleExplanation());
@@ -55,13 +57,13 @@ bool FlockingRule::drawImguiRule()
 
 			ImGui::SameLine(); HelpMarker("Drag to change the weight's value or CTRL+Click to input a new value.");
 
+			//Additional settings rule-dependant
+			if (drawImguiRuleExtra())
+			{
+				valueHasChanged = true;
+			}
 		}
 
-		//Additional settings rule-dependant
-		if (drawImguiRuleExtra())
-		{
-			valueHasChanged = true;
-		}
 		
 
 		ImGui::TreePop();
@@ -148,15 +150,11 @@ bool SeparationRule::drawImguiRuleExtra()
 {
 	bool valusHasChanged = false;
 
-	if (isEnabled)
+	if (ImGui::DragFloat("Desired Separation", &desiredMinimalDistance, 0.05f))
 	{
-
-		if (ImGui::DragFloat("Desired Separation", &desiredMinimalDistance, 0.05f))
-		{
-			valusHasChanged = true;
-		}
-
+		valusHasChanged = true;
 	}
+
 	return valusHasChanged;
 }
 
@@ -191,15 +189,11 @@ bool WindRule::drawImguiRuleExtra()
 {
 	bool valusHasChanged = false;
 
-	if (isEnabled)
+	if (ImGui::SliderAngle("Wind Direction", &windAngle, 0))
 	{
-
-		if (ImGui::SliderAngle("Wind Direction", &windAngle, 0))
-		{
-			valusHasChanged = true;
-		}
-
+		valusHasChanged = true;
 	}
+
 	return valusHasChanged;
 }
 
@@ -239,20 +233,17 @@ bool MouseInfluenceRule::drawImguiRuleExtra()
 
 	bool valusHasChanged = false;
 
-	if (isEnabled)
+	if (ImGui::RadioButton("Attractive", !isRepulsive))
 	{
-		if (ImGui::RadioButton("Attractive", !isRepulsive))
-		{
-			isRepulsive = false;
-			valusHasChanged = true;
-		}
+		isRepulsive = false;
+		valusHasChanged = true;
+	}
 
-		ImGui::SameLine();
-		if (ImGui::RadioButton("Repulsive", isRepulsive))
-		{
-			isRepulsive = true;
-			valusHasChanged = true;
-		}
+	ImGui::SameLine();
+	if (ImGui::RadioButton("Repulsive", isRepulsive))
+	{
+		isRepulsive = true;
+		valusHasChanged = true;
 	}
 
 	return valusHasChanged;
@@ -301,16 +292,13 @@ bool BoundedAreaRule::drawImguiRuleExtra()
 
 	bool valusHasChanged = false;
 
-	if (isEnabled)
+	//We cap the max separation as the third of the min of the width.height
+	int minHeightWidth = std::min(widthWindows, heightWindows);
+	if (ImGui::SliderInt("Desired Distance From Borders", &desiredDistance, 0.0f, minHeightWidth / 3, "%i"))
 	{
-		//We cap the max separation as the third of the min of the width.height
-		int minHeightWidth = std::min(widthWindows, heightWindows);
-		if (ImGui::SliderInt("Desired Distance From Borders", &desiredDistance, 0.0f, minHeightWidth / 3, "%i"))
-		{
-			valusHasChanged = true;
-		}
-
+		valusHasChanged = true;
 	}
+
 	return valusHasChanged;
 }
 

@@ -19,14 +19,20 @@ private:
 	/// Configuration
 
 	//Boids
-	int nbBoids = 120;
-	float baseSpeed = 80.;
-	float maxSpeed = 90.;
+	int nbBoids = 300;
+
+	bool hasConstantSpeed = false;
+	float desiredSpeed = 120.;
+
+	bool hasMaxAcceleration = false;
+	float maxAcceleration = 10.;
+
 	float detectionRadius = 40.;
 
 	//Display
 	bool showRadius = false;
 	bool showRules = true;
+	bool showAcceleration = false;
 
 	//rules
 	std::vector<std::unique_ptr<FlockingRule>> boidsRules;

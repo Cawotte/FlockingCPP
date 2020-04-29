@@ -12,12 +12,12 @@ using namespace utils;
 void World::initializeRules()
 {
 	//Starting Rules
-	boidsRules.emplace_back(std::make_unique<SeparationRule>(25., 7.));
-	boidsRules.emplace_back(std::make_unique<CohesionRule>(13.));
-	boidsRules.emplace_back(std::make_unique<AlignmentRule>(6.));
+	boidsRules.emplace_back(std::make_unique<SeparationRule>(25., 4.75));
+	boidsRules.emplace_back(std::make_unique<CohesionRule>(4.25));
+	boidsRules.emplace_back(std::make_unique<AlignmentRule>(2.9));
 	boidsRules.emplace_back(std::make_unique<MouseInfluenceRule>(2.));
 	boidsRules.emplace_back(std::make_unique<BoundedAreaRule>(
-		windowPtr->getSize().y, windowPtr->getSize().x, 100, 4., false));
+		windowPtr->getSize().y, windowPtr->getSize().x, 80, 3.5, false));
 	boidsRules.emplace_back(std::make_unique<WindRule>(1., 330, false));
 
 	//Starting weights are saved as defaults
@@ -76,7 +76,7 @@ void World::setNumberOfBoids(int number)
 void World::randomizeBoidPositionAndVelocity(Boid* boid)
 {
 	boid->setPosition(vector2::getRandom(windowPtr->getSize().x, windowPtr->getSize().y));
-	boid->setVelocity(vector2::getVector2FromDegree(rand() % 360) * baseSpeed); //Random dir
+	boid->setVelocity(vector2::getVector2FromDegree(rand() % 360) * desiredSpeed); //Random dir
 }
 
 void World::warpParticleIfOutOfBounds(Particle* particle)
@@ -114,7 +114,9 @@ BoidPtr World::createBoid()
 	randomizeBoidPositionAndVelocity(boid.get());
 	boid->setFlockingRules(boidsRules);
 	boid->setDetectionRadius(detectionRadius);
-	boid->setMaxSpeed(maxSpeed);
+	boid->setSpeed(desiredSpeed);
+	boid->setHasConstantSpeed(hasConstantSpeed);
+	boid->drawAcceleration = showAcceleration;
 	boid->drawDebugRadius = showRadius;
 	boid->drawDebugRules = showRules;
 
@@ -158,28 +160,87 @@ void World::drawGeneralUI()
 			}
 		}
 
-		if (ImGui::SliderFloat("Max Speed", &maxSpeed, 0.0f, 300.0f, "%.f"))
+		//Speeds
+
+		if (ImGui::TreeNode("Movement Settings"))
 		{
-			for (const auto& boid : boids)
+
+			if (ImGui::Checkbox("Has Constant Speed", &hasConstantSpeed))
 			{
-				boid->setMaxSpeed(maxSpeed);
+				for (const auto& boid : boids)
+				{
+					boid->setHasConstantSpeed(hasConstantSpeed);
+				}
 			}
+
+			const char* speedLabel = hasConstantSpeed ? "Speed" : "Max Speed";
+			if (ImGui::SliderFloat(speedLabel, &desiredSpeed, 0.0f, 300.0f, "%.f"))
+			{
+				for (const auto& boid : boids)
+				{
+					boid->setSpeed(desiredSpeed);
+				}
+			}
+
+			//Acceleration
+
+			if (ImGui::Checkbox("Has Max Acceleration", &hasMaxAcceleration))
+			{
+				for (const auto& boid : boids)
+				{
+					if (hasMaxAcceleration)
+					{
+						boid->setMaxAcceleration(maxAcceleration);
+					}
+					else {
+						boid->setMaxAcceleration(10000.);
+					}
+				}
+			}
+
+			if (hasMaxAcceleration)
+			{
+				if (ImGui::SliderFloat("Max Acceleration", &maxAcceleration, 0.0f, 35.0f, "%.f"))
+				{
+					for (const auto& boid : boids)
+					{
+						boid->setMaxAcceleration(maxAcceleration);
+					}
+				}
+			}
+
+			ImGui::TreePop();
 		}
 
-		if (ImGui::Checkbox("Show Radius", &showRadius))
-		{
-			for (const auto& boid : boids)
-			{
-				boid->drawDebugRadius = showRadius;
-			}
-		}
 
-		if (ImGui::Checkbox("Show Rules", &showRules))
+		if (ImGui::TreeNode("Display Settings"))
 		{
-			for (const auto& boid : boids)
+
+			if (ImGui::Checkbox("Show Acceleration", &showAcceleration))
 			{
-				boid->drawDebugRules = showRules;
+				for (const auto& boid : boids)
+				{
+					boid->drawAcceleration = showAcceleration;
+				}
 			}
+
+			if (ImGui::Checkbox("Show Radius", &showRadius))
+			{
+				for (const auto& boid : boids)
+				{
+					boid->drawDebugRadius = showRadius;
+				}
+			}
+
+			if (ImGui::Checkbox("Show Rules", &showRules))
+			{
+				for (const auto& boid : boids)
+				{
+					boid->drawDebugRules = showRules;
+				}
+			}
+
+			ImGui::TreePop();
 		}
 
 		if (ImGui::Button("Randomize Boids position and velocity"))
@@ -196,12 +257,8 @@ void World::drawRulesUI()
 {
 	if (ImGui::CollapsingHeader("Rules"))
 	{
-		int i = 0;
 		for (auto& rule : boidsRules)
 		{
-			i++;
-			//Necessary to avoid similar ID and linked variables
-			ImGui::PushID(i);
 
 			if (rule->drawImguiRule()) //display the UI and returns true if a value has been changed
 			{
@@ -209,7 +266,6 @@ void World::drawRulesUI()
 			}
 			ImGui::Separator();
 
-			ImGui::PopID();
 		}
 
 		if (ImGui::Button("Restore Default Weights"))

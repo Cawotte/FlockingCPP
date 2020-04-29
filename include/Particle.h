@@ -11,11 +11,16 @@ class Particle : public sf::Drawable
 private:
 
 	//Members
-	float maxSpeed = 120.;
+
+	bool hasConstantSpeed = false;
+	float speed = 120.;
+
+	float maxAcceleration = 10.;
 
 
 	sf::Vector2f velocity;
 	sf::Vector2f acceleration;
+	sf::Vector2f previousAcceleration; //to draw Acc
 
 	//Methods
 	void resetAcceleration();
@@ -25,6 +30,9 @@ protected:
 	sf::CircleShape shape;
 
 public:
+
+
+	bool drawAcceleration = false;
 
 	//Constructor
 
@@ -53,10 +61,21 @@ public:
 		shape.setRotation(utils::vector2::getAngleDegree(velocity));
 	}
 
-	void setMaxSpeed(float newMaxSpeed)
+	void setSpeed(float newSpeed)
 	{
-		maxSpeed = newMaxSpeed;
+		speed = newSpeed;
 	}
+
+	void setMaxAcceleration(float newMaxAcceleration)
+	{
+		maxAcceleration = newMaxAcceleration;
+	}
+
+	void setHasConstantSpeed(bool hasConstantSpeed_)
+	{
+		hasConstantSpeed = hasConstantSpeed_;
+	}
+
 
 	//Methods
 

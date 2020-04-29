@@ -11,7 +11,7 @@ class FlockingRule
 
 protected:
 
-	//Multiplier for weight so we can tilt values closer to each other
+	//We'll cache the computed force to be able to display it later
 	sf::Vector2f force;
 
 	//if displayed
@@ -26,14 +26,20 @@ protected:
 
 	virtual sf::Vector2f computeForce(const std::vector<Boid*>& neighbordhood, Boid* boid) = 0;
 
+	//Multiplier for weight so we can tilt values closer to each other
 	virtual float getBaseWeightMultiplier() 
 	{
 		return 1.;
 	};
 
+	//Name of the rule
 	virtual const char* getRuleName() = 0;
 
+	//Short explanation of the rule
 	virtual const char* getRuleExplanation() = 0;
+
+	//Function to override to draw extra tweakable settings on ImGui, depending on rule.
+	virtual bool drawImguiRuleExtra() { return false; };
 
 public:
 
@@ -46,10 +52,11 @@ public:
 
 	virtual std::unique_ptr<FlockingRule> clone() = 0;
 
-
+	//Compute the force, weight it, and save it in cache.
 	sf::Vector2f computeWeightedForce(const std::vector<Boid*>& neighbordhood, Boid* boid);
 
-	virtual bool drawImguiRule();
+	//Draw the core of the rule settings on ImGui.
+	bool drawImguiRule();
 
 
 	// Inherited via Drawable
@@ -83,7 +90,7 @@ public:
 
 	virtual float getBaseWeightMultiplier() override
 	{
-		return .1;
+		return 1.;
 	}
 
 	sf::Vector2f computeForce(const std::vector<Boid*>& neighbordhood, Boid* boid) override;
@@ -120,13 +127,13 @@ public:
 
 	virtual float getBaseWeightMultiplier() override
 	{
-		return 100.;
+		return 1.;
 	}
 
 
 	sf::Vector2f computeForce(const std::vector<Boid*>& neighbordhood, Boid* boid) override;
 
-	bool drawImguiRule() override;
+	bool drawImguiRuleExtra() override;
 
 };
 
@@ -157,7 +164,7 @@ public:
 
 	virtual float getBaseWeightMultiplier() override
 	{
-		return .01;
+		return 1.;
 	}
 
 	sf::Vector2f computeForce(const std::vector<Boid*>& neighbordhood, Boid* boid) override;
@@ -202,7 +209,7 @@ public:
 
 	sf::Vector2f computeForce(const std::vector<Boid*>& neighbordhood, Boid* boid) override;
 
-	bool drawImguiRule() override;
+	bool drawImguiRuleExtra() override;
 };
 
 class MouseInfluenceRule : public FlockingRule
@@ -249,7 +256,7 @@ public:
 
 	sf::Vector2f computeForce(const std::vector<Boid*>& neighbordhood, Boid* boid) override;
 
-	bool drawImguiRule() override;
+	bool drawImguiRuleExtra() override;
 
 };
 
@@ -299,7 +306,7 @@ public:
 
 	sf::Vector2f computeForce(const std::vector<Boid*>& neighbordhood, Boid* boid) override;
 
-	bool drawImguiRule() override;
+	bool drawImguiRuleExtra() override;
 
 
 	virtual void draw(const Boid& boid, sf::RenderTarget& target, sf::RenderStates states = sf::RenderStates::Default) const override;

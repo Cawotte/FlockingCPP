@@ -37,59 +37,73 @@ bool FlockingRule::drawImguiRule()
 {
 	bool valueHasChanged = false;
 
-	//std::string rulename(typeid(this).name());
-	//rulename = rulename.substr(6); //remove "class "
-
-	ImGui::BulletText(getRuleName());
-	ImguiTooltip(getRuleExplanation());
-	if (ImGui::Checkbox("Enabled", &isEnabled))
+	if (ImGui::TreeNode(getRuleName())) 
 	{
-		valueHasChanged = true;
-	}
+		ImguiTooltip(getRuleExplanation());
 
-	if (isEnabled)
-	{
-		if (ImGui::DragFloat("Weight##", &weight, 0.025f))
+		if (ImGui::Checkbox("Enabled", &isEnabled))
 		{
 			valueHasChanged = true;
 		}
 
-		ImGui::SameLine(); HelpMarker("Drag to change the weight's value or CTRL+Click to input a new value.");
+		if (isEnabled)
+		{
+			if (ImGui::DragFloat("Weight##", &weight, 0.025f))
+			{
+				valueHasChanged = true;
+			}
 
+			ImGui::SameLine(); HelpMarker("Drag to change the weight's value or CTRL+Click to input a new value.");
+
+		}
+
+		//Additional settings rule-dependant
+		if (drawImguiRuleExtra())
+		{
+			valueHasChanged = true;
+		}
+		
+
+		ImGui::TreePop();
 	}
+	else {
+		ImguiTooltip(getRuleExplanation());
+	}
+	
 
 	return valueHasChanged;
 }
 
 void FlockingRule::draw(const Boid& boid, sf::RenderTarget& target, sf::RenderStates states) const
 {
-	graphics::drawVector(target, states, boid.getPosition(), force, debugColor);
+	//Scaled by 1.5f to see it more easily on screen.
+	graphics::drawVector(target, states, boid.getPosition(), force * 1.5f, debugColor);
 }
 
 sf::Vector2f CohesionRule::computeForce(const std::vector<Boid*>& neighbordhood, Boid* boid)
 {
-	sf::Vector2f centerOfMass;
 
-	for (std::vector<Boid*>::const_iterator it = neighbordhood.begin(); it != neighbordhood.end(); it++)
-	{
-		centerOfMass += (*it)->getPosition();
-	}
+	sf::Vector2f cohesionForce;
 
 	if (neighbordhood.size() > 0)
 	{
+
+		sf::Vector2f centerOfMass;
+
+		for (auto const& flockmate : neighbordhood)
+		{
+			centerOfMass += flockmate->getPosition();
+		}
+
 		centerOfMass /= static_cast<float>(neighbordhood.size());
 
 		//Get direction toward center of mass
 		sf::Vector2f towardCenter = centerOfMass - boid->getPosition();
 
-		force = vector2::normalized(towardCenter);
-	}
-	else 
-	{
-		force = sf::Vector2f();
+		cohesionForce = utils::vector2::normalized(towardCenter);
 	}
 
-	return force;
+	return cohesionForce;
 }
 
 sf::Vector2f SeparationRule::computeForce(const std::vector<Boid*>& neighbordhood, Boid* boid)
@@ -98,35 +112,41 @@ sf::Vector2f SeparationRule::computeForce(const std::vector<Boid*>& neighbordhoo
 	//Try to avoid boids too close
 	sf::Vector2f separatingForce;
 
-	for (std::vector<Boid*>::const_iterator it = neighbordhood.begin(); it != neighbordhood.end(); it++)
-	{
-		Boid* flockmate = (*it);
-		float distance = vector2::getDistance(boid->getPosition(), flockmate->getPosition());
-
-		if (distance < desiredMinimalDistance && distance > 0)
-		{
-			sf::Vector2f direction = vector2::normalized(flockmate->getPosition() - boid->getPosition());
-
-			separatingForce += -direction / distance;
-			//Each neighbor has an influence proportional to its distance
-			//separatingForce += -direction / exp(distance / 1000.f);
-		}
-	}
+	float desiredDistance = desiredMinimalDistance;
 
 	if (neighbordhood.size() > 0)
 	{
-		separatingForce /= static_cast<float>(neighbordhood.size());
+		sf::Vector2f position = boid->getPosition();
+		int countCloseFlockmates = 0;
+
+		for (auto const& flockmate : neighbordhood)
+		{
+			float distance = vector2::getDistance(position, flockmate->getPosition());
+
+			if (distance < desiredDistance && distance > 0)
+			{
+				sf::Vector2f opposedDirection = vector2::normalized(position - flockmate->getPosition());
+
+				//Each neighbor has an influence proportional to its distance
+				separatingForce += opposedDirection / distance;
+				countCloseFlockmates++;
+			}
+		}
+
+		if (countCloseFlockmates > 0) {
+			//We doesn't divide by neighboor counts, but too clost neighbor counts.
+			separatingForce /= static_cast<float>(countCloseFlockmates);
+		}
 	}
 
-	force = separatingForce;
-	//force = vector2::normalized(separatingForce);
+	separatingForce = vector2::normalized(separatingForce);
 
 	return separatingForce;
 }
 
-bool SeparationRule::drawImguiRule()
+bool SeparationRule::drawImguiRuleExtra()
 {
-	bool valusHasChanged = FlockingRule::drawImguiRule();
+	bool valusHasChanged = false;
 
 	if (isEnabled)
 	{
@@ -142,23 +162,22 @@ bool SeparationRule::drawImguiRule()
 
 sf::Vector2f AlignmentRule::computeForce(const std::vector<Boid*>& neighbordhood, Boid* boid)
 {
-	//Try to match the heading and speed of neighbors = Average velocity
+	//Try to match the heading of neighbors = Average velocity
 
 	sf::Vector2f averageVelocity;
 
-	for (std::vector<Boid*>::const_iterator it = neighbordhood.begin(); it != neighbordhood.end(); it++)
-	{
-		averageVelocity += (*it)->getVelocity();
-	}
-
 	if (neighbordhood.size() > 0)
 	{
+
+		for (auto const& flockmate : neighbordhood)
+		{
+			averageVelocity += (flockmate)->getVelocity();
+		}
+
 		averageVelocity /= static_cast<float>(neighbordhood.size());
 	}
 
-	force = averageVelocity;
-
-	return averageVelocity;
+	return utils::vector2::normalized(averageVelocity);
 }
 
 ///WIND 
@@ -168,9 +187,9 @@ sf::Vector2f WindRule::computeForce(const std::vector<Boid*>& neighbordhood, Boi
 	return utils::vector2::normalized(utils::vector2::getVector2FromRadian(windAngle));
 }
 
-bool WindRule::drawImguiRule()
+bool WindRule::drawImguiRuleExtra()
 {
-	bool valusHasChanged = FlockingRule::drawImguiRule();
+	bool valusHasChanged = false;
 
 	if (isEnabled)
 	{
@@ -215,28 +234,28 @@ sf::Vector2f MouseInfluenceRule::computeForce(const std::vector<Boid*>& neighbor
 
 }
 
-bool MouseInfluenceRule::drawImguiRule()
+bool MouseInfluenceRule::drawImguiRuleExtra()
 {
 
-	bool hasChangedValue = FlockingRule::drawImguiRule();
+	bool valusHasChanged = false;
 
 	if (isEnabled)
 	{
 		if (ImGui::RadioButton("Attractive", !isRepulsive))
 		{
 			isRepulsive = false;
-			hasChangedValue = true;
+			valusHasChanged = true;
 		}
 
 		ImGui::SameLine();
 		if (ImGui::RadioButton("Repulsive", isRepulsive))
 		{
 			isRepulsive = true;
-			hasChangedValue = true;
+			valusHasChanged = true;
 		}
 	}
 
-	return hasChangedValue;
+	return valusHasChanged;
 }
 
 sf::Vector2f BoundedAreaRule::computeForce(const std::vector<Boid*>& neighbordhood, Boid* boid)
@@ -244,51 +263,55 @@ sf::Vector2f BoundedAreaRule::computeForce(const std::vector<Boid*>& neighbordho
 	//Return a force proportional to the proximity of the boids with the bounds, and opposed to it
 
 	sf::Vector2f force; //zero
+	sf::Vector2f position = boid->getPosition();
+
+	float epsilon = 0.00001f;  //avoid div by zero
 
 	//Too close from min
-	if (boid->getPosition().x < desiredDistance)
+	if (position.x < desiredDistance)
 	{
-		force.x += desiredDistance / boid->getPosition().x; //car position.x = distance de 0 à x.
+		force.x += desiredDistance / position.x; //car position.x = distance de 0 à x.
 	}
 	//Too close from max
-	else if (boid->getPosition().x > widthWindows - desiredDistance)
+	else if (position.x > widthWindows - desiredDistance)
 	{
-		int d = boid->getPosition().x - widthWindows;
-		if (d == 0) d = 1000; //avoid div by zero
-		force.x += desiredDistance / d;
+		int d = position.x - widthWindows;
+		//if (d == 0) d = 0.0001; //avoid div by zero
+		force.x += desiredDistance / (d + epsilon);
 	}
 
 	//Too close from min
-	if (boid->getPosition().y < desiredDistance)
+	if (position.y < desiredDistance)
 	{
-		force.y += desiredDistance / boid->getPosition().y; 
+		force.y += desiredDistance / position.y;
 	}
 	//Too close from max
-	else if (boid->getPosition().y > heightWindows - desiredDistance)
+	else if (position.y > heightWindows - desiredDistance)
 	{
-		int d = boid->getPosition().y - heightWindows;
-		if (d == 0) d = 1000; //avoid div by zero
-		force.y += desiredDistance / d;
+		int d = position.y - heightWindows;
+		//if (d == 0) d = 0.0001; //avoid div by zero
+		force.y += desiredDistance / (d + epsilon);
 	}
 
 	return force;
 }
 
-bool BoundedAreaRule::drawImguiRule()
+bool BoundedAreaRule::drawImguiRuleExtra()
 {
 
-	bool valueHasChanged = FlockingRule::drawImguiRule();
+	bool valusHasChanged = false;
+
 	if (isEnabled)
 	{
 		//We cap the max separation as the third of the min of the width.height
 		int minHeightWidth = std::min(widthWindows, heightWindows);
 		if (ImGui::SliderInt("Desired Distance From Borders", &desiredDistance, 0.0f, minHeightWidth / 3, "%i"))
 		{
-			valueHasChanged = true;
+			valusHasChanged = true;
 		}
 
 	}
-	return valueHasChanged;
+	return valusHasChanged;
 }
 
 void BoundedAreaRule::draw(const Boid& boid, sf::RenderTarget& target, sf::RenderStates states) const

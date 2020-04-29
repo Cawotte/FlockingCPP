@@ -31,15 +31,27 @@ void Particle::update(const float deltaTime)
 
 void Particle::updatePosition(const float deltaTime)
 {
+
+	//Has a max acceleration per frame
+	if (utils::vector2::getMagnitude(acceleration) > maxAcceleration)
+	{
+		acceleration = utils::vector2::normalized(acceleration) * maxAcceleration;
+	}
+
 	//Apply acceleration to velocity
 	setVelocity(velocity + acceleration);
 
 	resetAcceleration();
 
-	//If velocity too high, cap it
-	if (utils::vector2::getMagnitude(velocity) > maxSpeed) 
+	//constant speed never change
+	if (hasConstantSpeed)
 	{
-		setVelocity(utils::vector2::normalized(velocity) * maxSpeed);
+		setVelocity(utils::vector2::normalized(velocity) * speed);
+	}
+	//else only ceil the speed if wanted
+	else if (utils::vector2::getMagnitude(velocity) > speed)
+	{
+		setVelocity(utils::vector2::normalized(velocity) * speed);
 	}
 
 	shape.move(velocity * deltaTime);
@@ -48,11 +60,18 @@ void Particle::updatePosition(const float deltaTime)
 void Particle::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
 	target.draw(shape);
+
+	if (drawAcceleration)
+	{
+		sf::Color accelerationColor = utils::graphics::Purple;
+		utils::graphics::drawVector(target, states, getPosition(), previousAcceleration * 1.5f, accelerationColor);
+	}
 }
 
 //Private Methods
 
 void Particle::resetAcceleration()
 {
+	previousAcceleration = acceleration;
 	acceleration = sf::Vector2f();
 }

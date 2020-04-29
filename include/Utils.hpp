@@ -150,6 +150,13 @@ namespace utils {
 		}
 
 		template <class Vec2>
+		float getSquaredDistance(const Vec2& a, const Vec2& b)
+		{
+			//return std::powf(a.x - b.x, 2.) + std::powf(a.y - b.y, 2.);
+			return (a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y);
+		}
+
+		template <class Vec2>
 		Vec2 normalized(const Vec2& vector)
 		{
 			float magnitude = getMagnitude<Vec2>(vector);

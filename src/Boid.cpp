@@ -10,13 +10,19 @@ std::vector<Boid*> Boid::computeBoidNeighbordhood()
 {
 	std::vector<Boid*> neighborhood;
 
+	float detectionRadiusSquared = std::powf(detectionRadius, 2.);
+	sf::Vector2f position = getPosition();
+
+	//We compare distance to squared distances to avoid doing square roots.
+
 	for (const auto& boid : *boids)
 	{
 		if (boid != this) {
 
-			float distance = vector2::getDistance(getPosition(), boid->getPosition());
+			float squareDistance = vector2::getSquaredDistance(position, boid->getPosition());
+
 			//Verify if boid is close enough to be part of the neighborhood
-			if (distance <= detectionRadius)
+			if (squareDistance <= detectionRadiusSquared)
 			{
 				neighborhood.push_back(boid);
 			}

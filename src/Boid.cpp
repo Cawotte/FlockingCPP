@@ -10,7 +10,7 @@ std::vector<Boid*> Boid::computeBoidNeighbordhood()
 {
 	std::vector<Boid*> neighborhood;
 
-	float detectionRadiusSquared = std::powf(detectionRadius, 2.);
+	float detectionRadiusSquared = std::pow(detectionRadius, 2.);
 	sf::Vector2f position = getPosition();
 
 	//We compare distance to squared distances to avoid doing square roots.

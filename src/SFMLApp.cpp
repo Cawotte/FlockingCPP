@@ -5,9 +5,11 @@
 #include "Boid.h"
 #include "ImGuiExtra.h"
 
-//Memory
-#include "windows.h"
-#include "psapi.h"
+//Windows include for performance calculation
+#if defined(_WIN32)
+	#include "windows.h"
+	#include "psapi.h"
+#endif 
 
 #include "imgui/imgui.h"
 #include "imgui/imgui-SFML.h"
@@ -77,6 +79,9 @@ void SFMLApp::drawPerformanceUI()
 {
 	if (ImGui::CollapsingHeader("Performance"))
 	{
+		//The  functions called are Windows specific
+		#if defined(_WIN32)
+
 		///FPS Count
 		float framePerSecond = 1. / deltaTime.asSeconds();
 		ImGui::Text("Frames Per Second (FPS) : %.f", framePerSecond);
@@ -89,24 +94,24 @@ void SFMLApp::drawPerformanceUI()
 		GlobalMemoryStatusEx(&memInfo);
 
 		//Total Virtual Memory
-		DWORDLONG totalVirtualMem = memInfo.ullTotalPageFile;
+		std::int64_t totalVirtualMem = memInfo.ullTotalPageFile;
 
 		//Virtual Memory currently used
-		DWORDLONG virtualMemUsed = memInfo.ullTotalPageFile - memInfo.ullAvailPageFile;
+		std::int64_t virtualMemUsed = memInfo.ullTotalPageFile - memInfo.ullAvailPageFile;
 
 		//Virtual Memory current process
 		PROCESS_MEMORY_COUNTERS_EX pmc;
 		GetProcessMemoryInfo(GetCurrentProcess(), (PROCESS_MEMORY_COUNTERS*)&pmc, sizeof(pmc));
-		SIZE_T virtualMemUsedByMe = pmc.PrivateUsage;
+		std::size_t virtualMemUsedByMe = pmc.PrivateUsage;
 
 		//Total RAM
-		DWORDLONG totalPhysMem = memInfo.ullTotalPhys;
+		std::int64_t totalPhysMem = memInfo.ullTotalPhys;
 
 		//Ram Currently Used
-		DWORDLONG physMemUsed = memInfo.ullTotalPhys - memInfo.ullAvailPhys;
+		std::int64_t physMemUsed = memInfo.ullTotalPhys - memInfo.ullAvailPhys;
 
 		//Ram Current used by Process
-		SIZE_T physMemUsedByMe = pmc.WorkingSetSize;
+		std::size_t physMemUsedByMe = pmc.WorkingSetSize;
 
 		int div = 1048576;
 
@@ -124,6 +129,10 @@ void SFMLApp::drawPerformanceUI()
 
 		ImGui::Text("RAM used by process : %uMb \n", physMemUsedByMe / div);
 		PlotVar("Ram Consumption (Mb)", physMemUsedByMe / div);
+
+		#else
+		ImGui::Text("Only implemented on Windows.");
+		#endif
 	}
 }
 
